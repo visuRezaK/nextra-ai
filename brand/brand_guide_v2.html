@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CODE FIRST — Brand Guide v2.0 | Code First AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #F8FAFC;
+    --bg2:       #EFF6FF;
+    --bg3:       #E0F2FE;
+    --dark:      #1E293B;
+    --blue:      #0EA5E9;
+    --blue-light:#0284C7;
+    --blue-dim:  rgba(14,165,233,0.10);
+    --blue-glow: rgba(14,165,233,0.20);
+    --text:      #0F172A;
+    --text-muted:#475569;
+    --text-dim:  #94A3B8;
+    --border:    rgba(14,165,233,0.20);
+    --glass:     rgba(14,165,233,0.06);
+    --glass2:    rgba(14,165,233,0.05);
+    --radius:    16px;
+    --radius-sm: 10px;
+    --font-fa:   'Vazirmatn', sans-serif;
+    --font-en:   'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-fa);
+    line-height: 1.7;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 99px; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 16px;
+    right: 24px;
+    left: 24px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(248,250,252,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 24px;
+    box-shadow: 0 2px 16px rgba(14,165,233,0.08);
+  }
+
+  .nav-logo {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 2px;
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    flex-wrap: wrap;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-links a:hover {
+    color: var(--blue);
+    background: var(--blue-dim);
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 100px 24px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--font-en);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: var(--blue);
+    border-radius: 2px;
+  }
+
+  h1, h2, h3, h4 { font-family: var(--font-fa); font-weight: 800; line-height: 1.3; }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-top: 100px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #hero::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(14,165,233,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulse 6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    50%       { opacity: 1;   transform: translateX(-50%) scale(1.08); }
+  }
+
+  .hero-logo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--blue-dim);
+    border: 1.5px solid var(--blue);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 32px var(--blue-glow);
+  }
+
+  .hero-title-block { text-align: right; }
+
+  .hero-brand {
+    font-family: var(--font-en);
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .hero-sub {
+    font-family: var(--font-en);
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--blue);
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  .hero-tagline-fa {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue), #6366F1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-tagline-en {
+    font-family: var(--font-en);
+    font-size: 16px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--text-muted);
+    backdrop-filter: blur(8px);
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--blue);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ─── GLASS CARD ─── */
+  .card {
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .card:hover {
+    border-color: rgba(14,165,233,0.4);
+    box-shadow: 0 0 24px rgba(14,165,233,0.1);
+  }
+
+  .card-blue {
+    background: var(--blue-dim);
+    border-color: rgba(14,165,233,0.3);
+  }
+
+  /* ─── STORY ─── */
+  .story-box {
+    background: linear-gradient(135deg, #EFF6FF, #E0F2FE);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .story-box::before {
+    content: '"';
+    font-family: var(--font-en);
+    font-size: 180px;
+    color: var(--blue);
+    opacity: 0.07;
+    position: absolute;
+    top: -30px;
+    left: 20px;
+    line-height: 1;
+    font-weight: 900;
+  }
+
+  .story-text {
+    font-size: 18px;
+    line-height: 2;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+  }
+
+  .story-highlight {
+    color: var(--blue-light);
+    font-weight: 700;
+  }
+
+  /* ─── STORYBRAND SCRIPT ─── */
+  .script-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .script-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 20px 24px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all 0.25s;
+  }
+
+  .script-item:hover { border-color: rgba(14,165,233,0.4); }
+
+  .script-num {
+    font-family: var(--font-en);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--blue);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 3px;
+  }
+
+  .script-num-circle {
+    width: 28px;
+    height: 28px;
+    background: var(--blue-dim);
+    border: 1px solid var(--blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .script-content h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .script-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .script-content .highlight-quote {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: var(--blue-dim);
+    border-right: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    color: var(--blue-light);
+    font-style: italic;
+  }
+
+  /* ─── STRATEGY ─── */
+  .strategy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .strategy-card {
+    padding: 32px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.25s;
+  }
+
+  .strategy-card:hover { border-color: rgba(14,165,233,0.4); }
+
+  .strategy-card-label {
+    font-family: var(--font-en);
+    font-size: 10px;
+    letter-spacing: 3px;
+    font-weight: 600;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .strategy-card h3 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .strategy-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .positioning-card {
+    padding: 36px;
+    background: var(--blue-dim);
+    border: 1.5px solid rgba(14,165,233,0.4);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+
+  .positioning-card p {
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .positioning-card span { color: var(--blue-light); }
+
+  /* ─── VALUES BENTO ─── */
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+
+  .bento-card {
+    padding: 32px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.25s;
+    cursor: default;
+  }
+
+  .bento-card:hover {
+    border-color: rgba(14,165,233,0.5);
+    box-shadow: 0 8px 32px rgba(14,165,233,0.1);
+    transform: translateY(-2px);
+  }
+
+  .bento-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--blue-dim);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .bento-card h3 {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .bento-card .en-label {
+    font-family: var(--font-en);
+    font-size: 11px;
+    color: var(--blue);
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .bento-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .bento-bullets {
+    margin-top: 10px;
+    list-style: none;
+  }
+
+  .bento-bullets li {
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 3px 0;
+    padding-right: 14px;
+    position: relative;
+  }
+
+  .bento-bullets li::before {
+    content: '·';
+    position: absolute;
+    right: 0;
+    color: var(--blue);
+    font-weight: 900;
+  }
+
+  /* ─── AUDIENCE ─── */
+  .audience-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .audience-tag {
+    padding: 8px 20px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .audience-tag:hover {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    color: var(--blue-light);
+  }
+
+  .pain-box {
+    padding: 28px 32px;
+    background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(14,165,233,0.03));
+    border: 1px solid rgba(14,165,233,0.25);
+    border-radius: var(--radius);
+  }
+
+  .pain-box h4 {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--blue);
+    font-family: var(--font-en);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .pain-box p {
+    font-size: 16px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+
+  /* ─── USP ─── */
+  .usp-box {
+    background: linear-gradient(135deg, #EFF6FF, rgba(14,165,233,0.12));
+    border: 1.5px solid rgba(14,165,233,0.35);
+    border-radius: var(--radius);
+    padding: 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .usp-box::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(14,165,233,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .usp-box h2 {
+    font-size: clamp(20px, 3vw, 30px);
+    font-weight: 900;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .usp-box h2 span { color: var(--blue-light); }
+
+  .usp-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .elevator-box {
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+  }
+
+  .elevator-box h4 {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--blue);
+    font-family: var(--font-en);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .elevator-box blockquote {
+    font-size: 15px;
+    line-height: 2;
+    color: var(--text);
+    border-right: 3px solid var(--blue);
+    padding-right: 20px;
+  }
+
+  /* ─── SERVICES ─── */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .service-card {
+    padding: 30px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.25s;
+    cursor: default;
+  }
+
+  .service-card:hover {
+    border-color: rgba(14,165,233,0.45);
+    box-shadow: 0 8px 32px rgba(14,165,233,0.1);
+    transform: translateY(-3px);
+  }
+
+  .service-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--blue-dim);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .service-card h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .service-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  /* ─── COLORS ─── */
+  .colors-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .color-swatch {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    cursor: default;
+  }
+
+  .swatch-color {
+    height: 80px;
+    transition: transform 0.2s;
+  }
+
+  .color-swatch:hover .swatch-color { transform: scale(1.04); }
+
+  .swatch-info {
+    padding: 10px 12px;
+    background: #fff;
+  }
+
+  .swatch-hex {
+    font-family: var(--font-en);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+  }
+
+  .swatch-name {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    display: block;
+  }
+
+  .swatch-role {
+    font-size: 10px;
+    color: var(--blue);
+    font-family: var(--font-en);
+    letter-spacing: 1px;
+    margin-top: 2px;
+    display: block;
+  }
+
+  .typo-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .typo-card {
+    padding: 28px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .typo-card .typo-label {
+    font-family: var(--font-en);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .typo-sample-fa {
+    font-family: var(--font-fa);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .typo-sample-en {
+    font-family: var(--font-en);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .typo-detail {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ─── VOICE ─── */
+  .dos-donts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .dos-col, .donts-col { display: flex; flex-direction: column; gap: 10px; }
+
+  .dd-header {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: var(--font-en);
+    text-align: center;
+  }
+
+  .do-header { background: rgba(34,197,94,0.1); color: #4ADE80; border: 1px solid rgba(34,197,94,0.2); }
+  .dont-header { background: rgba(239,68,68,0.1); color: #F87171; border: 1px solid rgba(239,68,68,0.2); }
+
+  .dd-item {
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .do-item { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); color: var(--text); }
+  .dont-item { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); color: var(--text); }
+
+  .dd-icon { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; }
+
+  /* ─── BEFORE / AFTER ─── */
+  .ba-grid { display: flex; flex-direction: column; gap: 16px; }
+
+  .ba-card {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .ba-before {
+    padding: 16px;
+    background: rgba(239,68,68,0.07);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #F87171;
+    line-height: 1.7;
+  }
+
+  .ba-after {
+    padding: 16px;
+    background: rgba(34,197,94,0.07);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #4ADE80;
+    line-height: 1.7;
+  }
+
+  .ba-arrow {
+    color: var(--blue);
+    font-size: 22px;
+    font-family: var(--font-en);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  /* ─── INSTAGRAM BIO ─── */
+  .insta-mockup {
+    max-width: 360px;
+    margin: 0 auto;
+    background: var(--glass2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+  }
+
+  .insta-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-direction: row-reverse;
+  }
+
+  .insta-avatar {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--blue), #6366F1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 900;
+    color: white;
+    font-family: var(--font-en);
+    flex-shrink: 0;
+  }
+
+  .insta-handle {
+    font-family: var(--font-en);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .insta-bio-text {
+    font-size: 13.5px;
+    line-height: 1.9;
+    color: var(--text);
+    direction: rtl;
+    text-align: right;
+  }
+
+  .insta-bio-text .name-line {
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .insta-bio-text .cta-line {
+    color: var(--blue-light);
+    font-weight: 600;
+  }
+
+  .copy-btn {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: var(--blue-dim);
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    color: var(--blue-light);
+    font-size: 13px;
+    font-family: var(--font-fa);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .copy-btn:hover { background: rgba(14,165,233,0.25); }
+
+  /* ─── ONE-LINER ─── */
+  .oneliner-box {
+    background: linear-gradient(135deg, var(--blue-dim), rgba(99,102,241,0.1));
+    border: 1.5px solid rgba(14,165,233,0.4);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  .oneliner-box p {
+    font-size: clamp(15px, 2.2vw, 19px);
+    font-weight: 700;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .oneliner-box p span { color: var(--blue-light); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-dim);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer .footer-brand {
+    font-family: var(--font-en);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--blue);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    nav { padding: 10px 14px; }
+    .nav-links { display: none; }
+    section { padding: 80px 16px 60px; }
+    .strategy-grid, .bento, .services-grid, .dos-donts { grid-template-columns: 1fr; }
+    .colors-grid { grid-template-columns: repeat(3, 1fr); }
+    .typo-box { grid-template-columns: 1fr; }
+    .ba-card { grid-template-columns: 1fr; }
+    .ba-arrow { transform: rotate(90deg); }
+    .script-item { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .colors-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-logo { flex-direction: column; text-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav role="navigation" aria-label="ناوبری اصلی">
+  <a href="#hero" class="nav-logo" style="font-family:var(--font-en);">CODE FIRST</a>
+  <ul class="nav-links">
+    <li><a href="#story">داستان</a></li>
+    <li><a href="#storybrand">StoryBrand</a></li>
+    <li><a href="#strategy">استراتژی</a></li>
+    <li><a href="#values">ارزش‌ها</a></li>
+    <li><a href="#services">خدمات</a></li>
+    <li><a href="#visual">هویت بصری</a></li>
+    <li><a href="#voice">صدای برند</a></li>
+    <li><a href="#instagram">اینستاگرام</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-logo" style="animation:fadeUp 0.8s ease both;">
+    <div class="hero-icon" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 10L4 16L8 22" stroke="#0EA5E9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M24 10L28 16L24 22" stroke="#0EA5E9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 7L13 25" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="hero-title-block">
+      <div class="hero-brand">CODE FIRST</div>
+      <div class="hero-sub">AI CONSULTING</div>
+    </div>
+  </div>
+
+  <h1 class="hero-tagline-fa">هوش مصنوعی، سریع‌تر از فکرت</h1>
+  <p class="hero-tagline-en">Smarter business. Faster results.</p>
+
+  <div class="hero-badges">
+    <span class="badge"><span class="badge-dot" aria-hidden="true"></span>Code First AI</span>
+    <span class="badge"><span class="badge-dot" aria-hidden="true"></span>Brand Guide v2.0</span>
+    <span class="badge"><span class="badge-dot" aria-hidden="true"></span>۱۴۰۴</span>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── PERSONAL STORY ─── -->
+<section id="story">
+  <div class="section-label">PERSONAL STORY — داستان برند</div>
+  <h2 style="font-size:clamp(24px,3vw,36px); margin-bottom:32px;">چرا Code First AI؟</h2>
+
+  <div class="story-box">
+    <p class="story-text">
+      متخصص <span class="story-highlight">شبکه‌های کامپیوتری</span> که دید
+      <span class="story-highlight">AI</span> می‌تونه زیرساخت رشد هر کسب‌وکار کوچکی بشه —
+      و تصمیم گرفت این <span class="story-highlight">پل</span> رو بسازه.
+      <br><br>
+      ترکیب <span class="story-highlight">دانش تکنیکال</span> با <span class="story-highlight">زبان ساده و دوستانه</span>،
+      چیزیه که کمتر کسی داره.
+    </p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px;">
+    <div class="card" style="text-align:center; padding:24px 16px;">
+      <div style="font-size:28px; font-weight:900; color:var(--blue); font-family:var(--font-en); margin-bottom:6px;">۱ روز</div>
+      <div style="font-size:13px; color:var(--text-muted);">اجرای کامل AI در کسب‌وکار</div>
+    </div>
+    <div class="card" style="text-align:center; padding:24px 16px;">
+      <div style="font-size:28px; font-weight:900; color:var(--blue); font-family:var(--font-en); margin-bottom:6px;">۳ ماه</div>
+      <div style="font-size:13px; color:var(--text-muted);">پشتیبانی واقعی کنارت</div>
+    </div>
+    <div class="card" style="text-align:center; padding:24px 16px;">
+      <div style="font-size:28px; font-weight:900; color:var(--blue); font-family:var(--font-en); margin-bottom:6px;">۴۰٪</div>
+      <div style="font-size:13px; color:var(--text-muted);">رشد سفارش آنلاین یه رستوران — در ۳ روز</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── STORYBRAND SCRIPT ─── -->
+<section id="storybrand">
+  <div class="section-label">STORYBRAND — بیانیه برند ۷ بخشی</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:12px;">داستان مشتری، نه داستان ما</h2>
+  <p style="color:var(--text-muted); font-size:15px; margin-bottom:36px;">مشتری قهرمان داستانه — ما فقط راهنماییم که بهش کمک می‌کنیم ببره.</p>
+
+  <div class="script-grid">
+
+    <div class="script-item">
+      <div class="script-num">
+        <div class="script-num-circle">۱</div>
+        <div>HERO<br>قهرمان</div>
+      </div>
+      <div class="script-content">
+        <h4>صاحب کسب‌وکار کوچک — می‌خواد با AI سریع‌تر بفروشه</h4>
+        <p>وقت کم، رقابت زیاد. می‌دونه AI مهمه ولی نمی‌دونه از کجا شروع کنه. دغدغه: نتیجه سریع بدون پیچیدگی.</p>
+        <div class="highlight-quote">«می‌خوام کسب‌وکارم رشد کنه — نه اینکه وقتم رو صرف یاد گرفتن AI کنم»</div>
+      </div>
+    </div>
+
+    <div class="script-item">
+      <div class="script-num">
+        <div class="script-num-circle">۲</div>
+        <div>PROBLEM<br>مشکل</div>
+      </div>
+      <div class="script-content">
+        <h4>دشمن: پیچیدگی AI که مانع رشده</h4>
+        <p>
+          <strong style="color:var(--blue-light);">بیرونی:</strong> نمی‌دانند چطور AI را وارد کسب‌وکار کنند<br>
+          <strong style="color:var(--blue-light);">درونی:</strong> می‌ترسند AI سخت یا گران باشه — یا تنها بمانند<br>
+          <strong style="color:var(--blue-light);">فلسفی:</strong> هر کسب‌وکار کوچک حق داره از AI استفاده کنه، نه فقط بزرگ‌ها
+        </p>
+      </div>
+    </div>
+
+    <div class="script-item">
+      <div class="script-num">
+        <div class="script-num-circle">۳</div>
+        <div>GUIDE<br>راهنما</div>
+      </div>
+      <div class="script-content">
+        <h4>Code First AI — متخصصی که هم زبانته</h4>
+        <p>
+          <strong style="color:var(--blue-light);">همدلی:</strong> «می‌فهمم وقت کم داری و نمی‌خوای وقتت رو تلف کنی — خودم از همون جاده اومدم»<br>
+          <strong style="color:var(--blue-light);">اقتدار:</strong> سابقه در شبکه + اجرای واقعی AI در کسب‌وکارهای کوچک
+        </p>
+        <div class="highlight-quote">رستورانی که باهاش کار کردیم، سفارش آنلاینش ۴۰٪ بیشتر شد — در ۳ روز</div>
+      </div>
+    </div>
+
+    <div class="script-item">
+      <div class="script-num">
+        <div class="script-num-circle">۴</div>
+        <div>PLAN<br>نقشه راه</div>
+      </div>
+      <div class="script-content">
+        <h4>مسیر ۳ قدمی CODE FIRST</h4>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+          <div style="flex:1; min-width:120px; padding:12px; background:var(--blue-dim); border-radius:10px; text-align:center;">
+            <div style="font-size:20px; font-weight:900; color:var(--blue); font-family:var(--font-en);">۱</div>
+            <div style="font-size:13px; font-weight:700;">نیازسنجی دقیق</div>
+            <div style="font-size:11px; color:var(--text-muted);">تشخیص قبل از اقدام</div>
+          </div>
+          <div style="flex:1; min-width:120px; padding:12px; background:var(--blue-dim); border-radius:10px; text-align:center;">
+            <div style="font-size:20px; font-weight:900; color:var(--blue); font-family:var(--font-en);">۲</div>
+            <div style="font-size:13px; font-weight:700;">اجرا در یک روز</div>
+            <div style="font-size:11px; color:var(--text-muted);">CRM · وبسایت · دستیار</div>
+          </div>
+          <div style="flex:1; min-width:120px; padding:12px; background:var(--blue-dim); border-radius:10px; text-align:center;">
+            <div style="font-size:20px; font-weight:900; color:var(--blue); font-family:var(--font-en);">۳</div>
+            <div style="font-size:13px; font-weight:700;">پشتیبانی ۳ ماهه</div>
+            <div style="font-size:11px; color:var(--text-muted);">تنها نمی‌ذاریم</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="script-item">
+      <div class="script-num">
+        <div class="script-num-circle">۵</div>
+        <div>CTA<br>دعوت</div>
+      </div>
+      <div class="script-content">
+        <h4>یه قدم ساده</h4>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+          <div style="padding:10px 20px; background:var(--blue); border-radius:8px; font-size:13px; font-weight:700; color:white; cursor:default;">
+            رایگان بپرس ← مستقیم
+          </div>
+          <div style="padding:10px 20px; background:var(--glass2); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text-muted); cursor:default;">
+            ببین چطور کار می‌کنه ← انتقالی
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="script-item">
+      <div class="script-num">
+        <div class="script-num-circle">۶</div>
+        <div>FAILURE<br>شکست</div>
+      </div>
+      <div class="script-content">
+        <h4>اگر کاری نکنی...</h4>
+        <p>
+          رقبا AI می‌گیرن، سریع‌تر می‌فروشن، و تو عقب می‌مونی.<br>
+          مشتری‌هات به جایی می‌رن که سریع‌تر جواب می‌ده.<br>
+          وقتی تصمیم بگیری، شاید دیر شده باشه.
+        </p>
+      </div>
+    </div>
+
+    <div class="script-item" style="grid-column: 1 / -1;">
+      <div class="script-num">
+        <div class="script-num-circle">۷</div>
+        <div>SUCCESS<br>موفقیت</div>
+      </div>
+      <div class="script-content">
+        <h4>زندگی بعد از AI — تصویر موفقیت</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;">
+          <div style="padding:14px; background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.2); border-radius:10px;">
+            <div style="font-size:11px; color:#F87171; font-family:var(--font-en); letter-spacing:1px; margin-bottom:8px;">BEFORE</div>
+            <ul style="list-style:none; font-size:13px; color:var(--text-muted); line-height:2;">
+              <li>پشت گوشی برای پاسخ به مشتری</li>
+              <li>وقت کم، کار زیاد، درآمد ثابت</li>
+              <li>نمی‌دونی از کجا شروع کنی</li>
+              <li>رقبا جلوترن</li>
+            </ul>
+          </div>
+          <div style="padding:14px; background:rgba(34,197,94,0.07); border:1px solid rgba(34,197,94,0.2); border-radius:10px;">
+            <div style="font-size:11px; color:#4ADE80; font-family:var(--font-en); letter-spacing:1px; margin-bottom:8px;">AFTER</div>
+            <ul style="list-style:none; font-size:13px; color:var(--text-muted); line-height:2;">
+              <li>AI جواب مشتری می‌ده بدون دخالت تو</li>
+              <li>فروش بیشتر در همون ساعات کاری</li>
+              <li>از روز اول نتیجه می‌بینی</li>
+              <li>یه قدم جلوتر از رقبا</li>
+            </ul>
+          </div>
+        </div>
+        <div class="oneliner-box">
+          <p>
+            کمک می‌کنم کسب‌وکارهای کوچک که <span>وقت کم و رقابت زیاد دارن</span>،
+            با <span>یه روز اجرا و ۳ ماه پشتیبانی واقعی</span>،
+            از <span>گیج بودن در مورد AI</span> به
+            <span>فروش سریع‌تر و کار راحت‌تر</span> برسن.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── BRAND STRATEGY ─── -->
+<section id="strategy">
+  <div class="section-label">BRAND STRATEGY — استراتژی برند</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">ماموریت، چشم‌انداز، جایگاه</h2>
+
+  <div class="strategy-grid">
+    <div class="strategy-card">
+      <div class="strategy-card-label">Mission — ماموریت</div>
+      <h3>سرعت دادن به کسب‌وکار با AI</h3>
+      <p>از فروش تا ساخت محصول، در کمترین زمان ممکن — بدون پیچیدگی، بدون اتلاف وقت.</p>
+    </div>
+    <div class="strategy-card">
+      <div class="strategy-card-label">Vision — چشم‌انداز</div>
+      <h3>AI برای همه، نه فقط بزرگ‌ها</h3>
+      <p>«هر کسب‌وکار کوچک، ابزار AI یه شرکت بزرگ رو داشته باشه» — این آرزوی ماست.</p>
+    </div>
+  </div>
+
+  <div class="positioning-card">
+    <div style="font-family:var(--font-en); font-size:10px; letter-spacing:3px; color:var(--blue); margin-bottom:16px; font-weight:600;">POSITIONING — جایگاه برند</div>
+    <p>«تنها مشاور AI که نتیجه کار رو <span>در همون روز اول</span> می‌بینید — با <span>پشتیبانی تا ۳ ماه</span>»</p>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── VALUES ─── -->
+<section id="values">
+  <div class="section-label">BRAND VALUES — ارزش‌های برند</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">چهار اصل CODE FIRST</h2>
+
+  <div class="bento">
+
+    <div class="bento-card">
+      <div class="bento-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <h3>اعتماد در اولویت</h3>
+      <span class="en-label">Trust First</span>
+      <p>اعتماد مشتری مهم‌تر از درآمد کوتاه‌مدت است.</p>
+      <ul class="bento-bullets">
+        <li>اطلاعات مشتری را محرمانه نگه می‌داریم</li>
+        <li>وعده‌ای نمی‌دهیم که نتوانیم انجام دهیم</li>
+        <li>اگر AI مناسب نباشد، صادقانه می‌گوییم</li>
+      </ul>
+    </div>
+
+    <div class="bento-card">
+      <div class="bento-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </div>
+      <h3>نوآوری کاربردی</h3>
+      <span class="en-label">Practical AI</span>
+      <p>تمرکز ما روی نتایج واقعی کسب‌وکار است، نه صرفاً فناوری.</p>
+      <ul class="bento-bullets">
+        <li>ابزارهای جدید AI را آزمایش می‌کنیم</li>
+        <li>راه‌حل‌هایی که درآمد می‌آورند یا هزینه کم می‌کنند</li>
+        <li>دانش خود را به‌روز نگه می‌داریم</li>
+      </ul>
+    </div>
+
+    <div class="bento-card">
+      <div class="bento-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h3>سادگی و شفافیت</h3>
+      <span class="en-label">Simplicity</span>
+      <p>فناوری پیچیده را ساده و قابل فهم می‌کنیم.</p>
+      <ul class="bento-bullets">
+        <li>از اصطلاحات فنی غیرضروری استفاده نمی‌کنیم</li>
+        <li>راه‌حل‌های ساده‌تر را ترجیح می‌دهیم</li>
+        <li>هزینه‌ها و محدودیت‌ها را از ابتدا توضیح می‌دهیم</li>
+      </ul>
+    </div>
+
+    <div class="bento-card">
+      <div class="bento-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h3>موفقیت مشتری</h3>
+      <span class="en-label">Client Success</span>
+      <p>موفقیت مشتری = موفقیت ما.</p>
+      <ul class="bento-bullets">
+        <li>نتیجه را با هم می‌بینیم</li>
+        <li>تا ۳ ماه کنارت می‌مانیم</li>
+        <li>تنها نمی‌گذاریم</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── TARGET AUDIENCE ─── -->
+<section id="audience">
+  <div class="section-label">TARGET AUDIENCE — مخاطب هدف</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:24px;">برای کی کار می‌کنیم؟</h2>
+
+  <div class="audience-tags">
+    <span class="audience-tag">رستوران‌ها</span>
+    <span class="audience-tag">آژانس‌ها</span>
+    <span class="audience-tag">فروشگاه‌ها</span>
+    <span class="audience-tag">مشاوران مستقل</span>
+    <span class="audience-tag">کسب‌وکار کوچک</span>
+    <span class="audience-tag">هر سن و شغل</span>
+  </div>
+
+  <div class="pain-box">
+    <h4>MAIN PAIN — دغدغه اصلی مشتری</h4>
+    <p>
+      صاحب کسب‌وکار کوچک · وقت کم، رقابت زیاد · می‌داند AI مهم است ولی
+      نمی‌داند از کجا شروع کند · دغدغه:
+      <strong style="color:var(--blue-light);">نتیجه سریع بدون پیچیدگی</strong>
+    </p>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── USP + ELEVATOR PITCH ─── -->
+<section id="usp">
+  <div class="section-label">USP + ELEVATOR PITCH</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">ارزش پیشنهادی منحصربه‌فرد</h2>
+
+  <div class="usp-box">
+    <h2>در یک روز کاری،<br><span>هوش مصنوعی رو وارد کسب‌وکارت می‌کنیم</span></h2>
+    <p class="usp-sub">AI مشاور + پشتیبانی ۳ ماهه — نه فقط آموزش، بلکه اجرا</p>
+
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:28px;">
+      <div style="padding:10px 20px; background:rgba(255,255,255,0.06); border-radius:999px; font-size:13px; color:var(--text-muted);">از CRM تا وبسایت</div>
+      <div style="padding:10px 20px; background:rgba(255,255,255,0.06); border-radius:999px; font-size:13px; color:var(--text-muted);">با AI در یک روز</div>
+      <div style="padding:10px 20px; background:rgba(255,255,255,0.06); border-radius:999px; font-size:13px; color:var(--text-muted);">با پشتیبانی واقعی</div>
+    </div>
+  </div>
+
+  <div class="elevator-box">
+    <h4>ELEVATOR PITCH — معرفی ۳۰ ثانیه‌ای</h4>
+    <blockquote>
+      «من Code First AI‌ام، مشاور هوش مصنوعی. از دنیای شبکه‌های کامپیوتری اومدم و حالا کمک می‌کنم
+      کسب‌وکارهای کوچک — از رستوران تا آژانس — با AI سریع‌تر بفروشن و راحت‌تر کار کنن.
+      از CRM تا دستیار شخصی و وبسایت، همه رو در یک روز راه می‌اندازیم — و تا ۳ ماه کنارتون می‌مونیم.»
+    </blockquote>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── SERVICES ─── -->
+<section id="services">
+  <div class="section-label">SERVICES — خدمات اصلی</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">چی می‌کنیم؟</h2>
+
+  <div class="services-grid">
+
+    <div class="service-card">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <h3>نیازسنجی</h3>
+      <p style="color:var(--blue); font-size:12px; font-family:var(--font-en); letter-spacing:1px; margin-bottom:8px;">ASSESSMENT</p>
+      <p>تشخیص دقیق قبل از هر اقدامی — ببینیم کجا AI واقعاً کمک می‌کنه و کجا نه.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        </svg>
+      </div>
+      <h3>دستیار شخصی AI</h3>
+      <p style="color:var(--blue); font-size:12px; font-family:var(--font-en); letter-spacing:1px; margin-bottom:8px;">AI ASSISTANT</p>
+      <p>AI اختصاصی برای کسب‌وکارت — پیام‌ها، قیمت‌دهی، پیگیری. بدون دخالت تو.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </div>
+      <h3>اجرا در یک روز</h3>
+      <p style="color:var(--blue); font-size:12px; font-family:var(--font-en); letter-spacing:1px; margin-bottom:8px;">ONE-DAY EXECUTION</p>
+      <p>CRM · وبسایت · محصول — از صبح تا شب، یه سیستم کامل AI راه می‌اندازیم.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+      </div>
+      <h3>پشتیبانی</h3>
+      <p style="color:var(--blue); font-size:12px; font-family:var(--font-en); letter-spacing:1px; margin-bottom:8px;">SUPPORT</p>
+      <p>۱ تا ۳ ماه · پرامپت‌نویسی · به‌روزرسانی — تنها نمی‌ذاریمت.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── VISUAL IDENTITY ─── -->
+<section id="visual">
+  <div class="section-label">VISUAL IDENTITY — هویت بصری</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">رنگ‌ها و تایپوگرافی</h2>
+
+  <div class="colors-grid">
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#F8FAFC;"></div>
+      <div class="swatch-info">
+        <span class="swatch-hex" style="color:#1E293B;">#F8FAFC</span>
+        <span class="swatch-name" style="color:#64748B;">خاکستری روشن</span>
+        <span class="swatch-role">Background</span>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#1E293B;"></div>
+      <div class="swatch-info">
+        <span class="swatch-hex">#1E293B</span>
+        <span class="swatch-name">تیره عمیق</span>
+        <span class="swatch-role">رنگ اصلی · اعتماد</span>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#0EA5E9;"></div>
+      <div class="swatch-info">
+        <span class="swatch-hex">#0EA5E9</span>
+        <span class="swatch-name">آبی برقی</span>
+        <span class="swatch-role">رنگ تاکید · سرعت</span>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#38BDF8;"></div>
+      <div class="swatch-info">
+        <span class="swatch-hex">#38BDF8</span>
+        <span class="swatch-name">آبی روشن</span>
+        <span class="swatch-role">Accent Light</span>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#071020;"></div>
+      <div class="swatch-info">
+        <span class="swatch-hex">#071020</span>
+        <span class="swatch-name">سیاه عمیق</span>
+        <span class="swatch-role">Background Dark</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="typo-box">
+    <div class="typo-card">
+      <div class="typo-label">PERSIAN TYPEFACE</div>
+      <div class="typo-sample-fa">وزیرمتن — تیتر فارسی</div>
+      <div style="font-family:var(--font-fa); font-size:14px; color:var(--text-muted); margin-bottom:10px;">هوش مصنوعی، سریع‌تر از فکرت</div>
+      <div class="typo-detail">
+        خانواده: Vazirmatn<br>
+        وزن‌ها: ۳۰۰ · ۴۰۰ · ۷۰۰ · ۸۰۰ · ۹۰۰<br>
+        کاربرد: تیتر، متن، UI
+      </div>
+    </div>
+    <div class="typo-card">
+      <div class="typo-label">ENGLISH TYPEFACE</div>
+      <div class="typo-sample-en">Inter — English Body</div>
+      <div style="font-family:var(--font-en); font-size:14px; color:var(--text-muted); margin-bottom:10px; direction:ltr; text-align:left;">Smarter business. Faster results.</div>
+      <div class="typo-detail" style="direction:ltr; text-align:left;">
+        Family: Inter<br>
+        Weights: 400 · 500 · 600 · 700 · 800<br>
+        Usage: Labels, code, EN content
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px; padding:24px; background:var(--glass2); border:1px solid var(--border); border-radius:var(--radius);">
+    <div style="font-family:var(--font-en); font-size:10px; letter-spacing:2px; color:var(--blue); margin-bottom:16px; font-weight:600;">PERSONALITY TRAITS</div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <span class="badge"><span class="badge-dot"></span>دوستانه</span>
+      <span class="badge"><span class="badge-dot"></span>اثرگذار</span>
+      <span class="badge"><span class="badge-dot"></span>پشتکار</span>
+      <span class="badge"><span class="badge-dot"></span>تکنولوژیک</span>
+      <span class="badge"><span class="badge-dot"></span>ساده و صادق</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── BRAND VOICE ─── -->
+<section id="voice">
+  <div class="section-label">BRAND VOICE — صدای برند</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:12px;">DO's & DON'Ts</h2>
+  <p style="color:var(--text-muted); font-size:15px; margin-bottom:32px;">
+    صمیمی‌حرفه‌ای — مثل یه دوست باتجربه که راست می‌گه و نتیجه می‌ده.<br>
+    <span style="color:var(--text-dim); font-size:13px;">در ایمیل: جدی‌تر · در اینستاگرام: دوستانه‌تر · همیشه: مستقیم و ساده</span>
+  </p>
+
+  <div class="dos-donts">
+    <div class="dos-col">
+      <div class="dd-header do-header">✓ بگو</div>
+      <div class="dd-item do-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#4ADE80"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        <div><strong>AI رو با نتیجه معرفی کن</strong><br><span style="color:var(--text-dim);font-size:12px;">بگو AI چه کاری می‌کنه، نه اینکه AI چیه</span></div>
+      </div>
+      <div class="dd-item do-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#4ADE80"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        <div><strong>از عدد و بازه زمانی استفاده کن</strong><br><span style="color:var(--text-dim);font-size:12px;">«در یک روز»، «تا ۳ ماه» — ملموس و باورپذیر</span></div>
+      </div>
+      <div class="dd-item do-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#4ADE80"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        <div><strong>ترس از AI رو کم کن</strong><br><span style="color:var(--text-dim);font-size:12px;">«نیازی به کدنویسی نیست» — مخاطب می‌ترسد AI سخت باشد</span></div>
+      </div>
+      <div class="dd-item do-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#4ADE80"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        <div><strong>از مثال‌های واقعی استفاده کن</strong><br><span style="color:var(--text-dim);font-size:12px;">رستوران، آژانس، فروشگاه — مخاطب باید خودش رو ببینه</span></div>
+      </div>
+      <div class="dd-item do-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#4ADE80"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        <div><strong>پشتیبانی رو برجسته کن</strong><br><span style="color:var(--text-dim);font-size:12px;">«تنها نمی‌ذاریمت» — نگرانی اصلی مشتری اینه که تنها بمونه</span></div>
+      </div>
+    </div>
+
+    <div class="donts-col">
+      <div class="dd-header dont-header">✗ نگو</div>
+      <div class="dd-item dont-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#F87171"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        <div><strong>از تعریف فنی شروع نکن</strong><br><span style="color:var(--text-dim);font-size:12px;">مخاطب نمی‌داند LLM یا Machine Learning چیست</span></div>
+      </div>
+      <div class="dd-item dont-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#F87171"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        <div><strong>وعده کلی نده</strong><br><span style="color:var(--text-dim);font-size:12px;">«کسب‌وکارتان متحول می‌شود» بدون عدد اعتماد نمی‌سازد</span></div>
+      </div>
+      <div class="dd-item dont-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#F87171"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        <div><strong>AI رو جادویی نشون نده</strong><br><span style="color:var(--text-dim);font-size:12px;">«AI همه مشکلاتت رو حل می‌کنه» اعتبارت رو خراب می‌کنه</span></div>
+      </div>
+      <div class="dd-item dont-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#F87171"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        <div><strong>فقط درباره تکنولوژی حرف نزن</strong><br><span style="color:var(--text-dim);font-size:12px;">مخاطب به فروش بیشتر اهمیت می‌ده، نه به ChatGPT</span></div>
+      </div>
+      <div class="dd-item dont-item">
+        <svg class="dd-icon" viewBox="0 0 20 20" fill="#F87171"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        <div><strong>رقبا رو نکوبی</strong><br><span style="color:var(--text-dim);font-size:12px;">به جای «دیگران فقط آموزش می‌دن»، بگو «ما اجرا هم می‌کنیم»</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── BEFORE / AFTER ─── -->
+<section id="beforeafter">
+  <div class="section-label">BEFORE / AFTER — مثال‌های پیش و پس</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">از زبان پیچیده به زبان مشتری</h2>
+
+  <div class="ba-grid">
+
+    <div class="ba-card">
+      <div class="ba-before">
+        «با استفاده از مدل‌های زبانی بزرگ و اتوماسیون هوشمند، فرآیندهای کسب‌وکار شما بهینه می‌شود»
+      </div>
+      <div class="ba-arrow">←</div>
+      <div class="ba-after">
+        «با AI، جواب مشتری‌هات رو ۱۰ برابر سریع‌تر می‌دی — بدون اینکه خودت پشت گوشی باشی»
+      </div>
+    </div>
+
+    <div class="ba-card">
+      <div class="ba-before">
+        «هوش مصنوعی می‌تواند پتانسیل‌های بالقوه کسب‌وکار شما را شکوفا کند»
+      </div>
+      <div class="ba-arrow">←</div>
+      <div class="ba-after">
+        «رستوران‌داری که باهاش کار کردیم، سفارش‌های آنلاینش ۴۰٪ بیشتر شد — در ۳ روز»
+      </div>
+    </div>
+
+    <div class="ba-card">
+      <div class="ba-before">
+        «ما راه‌حل‌های جامع دیجیتال ترانسفورمیشن با رویکرد AI-First ارائه می‌دهیم»
+      </div>
+      <div class="ba-arrow">←</div>
+      <div class="ba-after">
+        «یه دستیار AI می‌سازیم که به جای تو به مشتری پیام می‌ده، قیمت می‌ده، و پیگیری می‌کنه»
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── INSTAGRAM BIO ─── -->
+<section id="instagram">
+  <div class="section-label">INSTAGRAM BIO — بیوی اینستاگرام</div>
+  <h2 style="font-size:clamp(22px,3vw,34px); margin-bottom:32px;">آماده کپی</h2>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
+
+    <div class="insta-mockup">
+      <div style="font-family:var(--font-en); font-size:10px; letter-spacing:2px; color:var(--blue); margin-bottom:16px; font-weight:600;">INSTAGRAM PREVIEW</div>
+      <div class="insta-header">
+        <div class="insta-avatar">RK</div>
+        <div>
+          <div class="insta-handle">rezakatanchi</div>
+          <div style="font-size:11px; color:var(--text-dim);">@rezakatanchi</div>
+        </div>
+      </div>
+      <div class="insta-bio-text">
+        <span class="name-line">Code First AI | مشاور هوش مصنوعی ✍️</span>
+        از متخصص شبکه تا AI Consultant<br>
+        هوش مصنوعی رو برای کسب‌وکارت ساده می‌کنم<br>
+        تمام کسب‌وکارهای بزرگ و کوچک می‌توانند از AI استفاده کنند.<br>
+        <span class="cta-line">📩 رایگان بپرس</span>
+      </div>
+      <button class="copy-btn" onclick="
+        navigator.clipboard.writeText('Code First AI | مشاور هوش مصنوعی ✍️\nاز متخصص شبکه تا AI Consultant\nهوش مصنوعی رو برای کسب‌وکارت ساده می‌کنم\nتمام کسب‌وکارهای بزرگ و کوچک می‌توانند از AI استفاده کنند.\n📩 رایگان بپرس');
+        this.textContent='کپی شد ✓';
+        setTimeout(()=>this.textContent='کپی بیو',2000);
+      ">کپی بیو</button>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div class="card" style="padding:20px;">
+        <div style="font-family:var(--font-en); font-size:10px; letter-spacing:2px; color:var(--blue); margin-bottom:10px; font-weight:600;">ONE-LINER</div>
+        <p style="font-size:14px; line-height:1.9;">کمک می‌کنم کسب‌وکارهای کوچک با یه روز اجرا و ۳ ماه پشتیبانی واقعی، از AI واهمه نداشته باشن و سریع‌تر بفروشن.</p>
+      </div>
+      <div class="card" style="padding:20px;">
+        <div style="font-family:var(--font-en); font-size:10px; letter-spacing:2px; color:var(--blue); margin-bottom:10px; font-weight:600;">HEADLINE OPTIONS</div>
+        <ul style="list-style:none; font-size:13.5px; line-height:2.2; color:var(--text-muted);">
+          <li style="padding-right:16px; position:relative;"><span style="position:absolute;right:0;color:var(--blue);">·</span> هوش مصنوعی رو در یک روز وارد کسب‌وکارت کن</li>
+          <li style="padding-right:16px; position:relative;"><span style="position:absolute;right:0;color:var(--blue);">·</span> AI برای کسب‌وکار کوچک — نتیجه از روز اول</li>
+          <li style="padding-right:16px; position:relative;"><span style="position:absolute;right:0;color:var(--blue);">·</span> رقبات AI گرفتن. تو چی؟</li>
+          <li style="padding-right:16px; position:relative;"><span style="position:absolute;right:0;color:var(--blue);">·</span> بدون کدنویسی، بدون پیچیدگی — AI از امروز</li>
+        </ul>
+      </div>
+      <div class="card" style="padding:20px;">
+        <div style="font-family:var(--font-en); font-size:10px; letter-spacing:2px; color:var(--blue); margin-bottom:10px; font-weight:600;">CTA OPTIONS</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <span style="padding:6px 14px; background:var(--blue); border-radius:6px; font-size:12px; color:white; font-weight:700;">رایگان بپرس</span>
+          <span style="padding:6px 14px; background:var(--glass2); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text-muted);">ببین چطور کار می‌کنه</span>
+          <span style="padding:6px 14px; background:var(--glass2); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text-muted);">مشاوره رایگان بگیر</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider" role="separator"></div>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <span class="footer-brand">CODE FIRST</span>
+  <p>AI CONSULTING · Code First AI</p>
+  <p style="margin-top:8px;">Brand Guide v2.0 · ۱۴۰۴ · Powered by StoryBrand + UI/UX Pro Max</p>
+</footer>
+
+</body>
+</html>

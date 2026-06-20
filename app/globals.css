@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Code First AI — AI Consulting · Brand Design System
+   Reza Katanchi · Brand Guide v2.0
+   Palette: ink #071020 · slate #1E293B · sky #0EA5E9
+            sky-light #38BDF8 · mist #F8FAFC
+   ============================================================ */
+
+:root {
+  /* Brand palette (from brand guide v2.0) */
+  --brand-ink: #071020;        /* سیاه عمیق — Background Dark */
+  --brand-slate: #1e293b;      /* تیره عمیق — deep surfaces */
+  --brand-sky: #0ea5e9;        /* آبی برقی — primary / trust */
+  --brand-sky-light: #38bdf8;  /* آبی روشن — accent / speed */
+  --brand-mist: #f8fafc;       /* خاکستری روشن — light bg */
+
+  /* Semantic tokens (light theme) */
+  --background: #ffffff;
+  --surface: #f8fafc;
+  --surface-2: #eef2f7;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --accent: var(--brand-sky);
+  --accent-hover: #0284c7;
+  --accent-foreground: #ffffff;
+
+  --radius: 0.9rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-ink: var(--brand-ink);
+  --color-slate: var(--brand-slate);
+  --color-sky: var(--brand-sky);
+  --color-sky-light: var(--brand-sky-light);
+
+  --font-sans: var(--font-inter), var(--font-vazir), system-ui, sans-serif;
+  --font-fa: var(--font-vazir), var(--font-inter), system-ui, sans-serif;
+
+  --radius-lg: var(--radius);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Persian pages use Vazirmatn as primary */
+html[lang="fa"] body {
+  font-family: var(--font-fa);
+}
+
+/* Subtle tech background glow */
+.bg-grid {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.10), transparent 60%),
+    linear-gradient(to bottom, var(--surface), var(--background));
+}
+
+.glow-accent {
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.12), 0 24px 60px -28px rgba(14, 165, 233, 0.35);
+}
+
+/* Gradient text for headlines */
+.text-gradient {
+  background: linear-gradient(120deg, #0284c7, var(--brand-sky-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Reusable card surface */
+.card-surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -16px rgba(15, 23, 42, 0.12);
+}
+
+/* Deep brand-ink surface (for accent panels / dark callouts) */
+.surface-ink {
+  background: linear-gradient(160deg, var(--brand-slate), var(--brand-ink));
+  color: var(--brand-mist);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+}
+
+::selection {
+  background: var(--brand-sky);
+  color: var(--accent-foreground);
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

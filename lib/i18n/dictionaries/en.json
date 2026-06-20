@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "title": "FirstAICode — AI Consulting",
+    "description": "I bring AI into your business in minimal time — from CRM to website — with one month of backend and content support."
+  },
+  "brand": {
+    "name": "First AI Code",
+    "tagline": "Smarter business. Faster results."
+  },
+  "nav": {
+    "services": "Services",
+    "why": "Why me",
+    "about": "About",
+    "faq": "FAQ",
+    "book": "Book a call",
+    "login": "Log in",
+    "signup": "Sign up",
+    "dashboard": "Dashboard",
+    "logout": "Log out"
+  },
+  "hero": {
+    "badge": "From network engineer to AI consultant",
+    "headline": "AI — the answer to your business needs",
+    "title": "Simple,",
+    "titleAccent": "faster than you expect",
+    "subtitle": "I make AI simple for your business. I bring it into your operation in minimal time — from CRM to website — and stay with you for one month.",
+    "ctaPrimary": "Book a consultation — $99",
+    "ctaSecondary": "See the consultation",
+    "stats": [
+      { "value": "Minimal", "label": "time to launch AI" },
+      { "value": "1 month", "label": "backend & content support" },
+      { "value": "0", "label": "code required" }
+    ]
+  },
+  "problem": {
+    "eyebrow": "The problem",
+    "title": "AI complexity shouldn't block your growth",
+    "subtitle": "Here's what AI complexity really means: not knowing where to start, which tool to pick, or how much it costs. My job is to make that complexity simple for you.",
+    "items": [
+      {
+        "title": "You don't know where to start",
+        "desc": "How does AI fit your business? Which tool? Which part? The confusion itself is the biggest barrier."
+      },
+      {
+        "title": "You fear it's hard or costly",
+        "desc": "Worried AI is too complex or the cost will spiral — or that you'll be left alone halfway through."
+      },
+      {
+        "title": "Competitors are pulling ahead",
+        "desc": "They adopt AI, sell faster, and you fall behind. Customers go where they get a faster answer."
+      }
+    ]
+  },
+  "services": {
+    "eyebrow": "Our path",
+    "title": "Our consultation session",
+    "subtitle": "Our path with you, step by step — from needs assessment to execution and support, so AI actually works for you.",
+    "items": [
+      {
+        "icon": "search",
+        "title": "Needs assessment",
+        "desc": "Precise diagnosis before any action. First we find where AI makes you faster."
+      },
+      {
+        "icon": "bot",
+        "title": "AI personal assistant",
+        "desc": "A dedicated assistant that messages customers, quotes prices and follows up — instead of you."
+      },
+      {
+        "icon": "zap",
+        "title": "Launch in minimal time",
+        "desc": "CRM, website and product — set up in minimal time. Not just talk, real execution."
+      },
+      {
+        "icon": "headset",
+        "title": "Backend & content support",
+        "desc": "I stay with you for one month — backend support, content, prompting and fixes are on me."
+      }
+    ]
+  },
+  "plan": {
+    "eyebrow": "The plan",
+    "title": "The 3-step First AI Code path",
+    "subtitle": "A simple, clear path — from diagnosis to execution and support. You know your business; the rest is on me.",
+    "steps": [
+      {
+        "title": "Precise assessment",
+        "desc": "Diagnosis before action — we find where AI truly helps, and where it doesn't."
+      },
+      {
+        "title": "Launch in minimal time",
+        "desc": "CRM, website and an AI assistant — a full system goes live in minimal time."
+      },
+      {
+        "title": "1-month support",
+        "desc": "Prompting and updates — I stay with you for one month and won't leave you alone."
+      }
+    ]
+  },
+  "featured": {
+    "tag": "First service",
+    "title": "Private 30-minute consultation",
+    "desc": "One focused, direct session. I tell you exactly where AI helps your business sell faster and work easier — no jargon.",
+    "points": [
+      "Live review of your business and what can be automated",
+      "A practical roadmap to start with AI",
+      "Session on Google Meet — link generated automatically after payment"
+    ],
+    "price": "$99",
+    "priceUnit": "/ 30 min",
+    "cta": "Book a consultation"
+  },
+  "transform": {
+    "eyebrow": "Before & after",
+    "title": "Life after AI",
+    "subtitle": "This is what changes — when AI is brought into your business the right way.",
+    "beforeLabel": "Before",
+    "afterLabel": "After",
+    "rows": [
+      {
+        "before": "Glued to the phone answering every customer",
+        "after": "AI answers customers, without your involvement"
+      },
+      {
+        "before": "Little time, lots of work, flat revenue",
+        "after": "More sales in the same working hours"
+      },
+      {
+        "before": "You don't know where to start",
+        "after": "You see results from day one"
+      },
+      {
+        "before": "Competitors are ahead",
+        "after": "One step ahead of competitors"
+      }
+    ]
+  },
+  "why": {
+    "title": "Why First AI Code?",
+    "subtitle": "A computer-networks specialist who saw AI could become the growth backbone of any business — and built that bridge.",
+    "items": [
+      {
+        "title": "Trust first",
+        "desc": "Your data stays private. I won't promise what I can't deliver. If AI isn't a fit, I'll say so honestly."
+      },
+      {
+        "title": "Simple and clear",
+        "desc": "I make complex tech simple. No unnecessary jargon; costs are clear from the start."
+      },
+      {
+        "title": "Practical innovation",
+        "desc": "My focus is real business results, not new toys. Solutions that earn revenue or cut costs."
+      },
+      {
+        "title": "Client success",
+        "desc": "Your success = my success. We see results together and I stay with you for one month."
+      }
+    ]
+  },
+  "usp": {
+    "title": "The only AI consultant who shows results on day one",
+    "subtitle": "AI consultant + 1-month support — not just training, real execution.",
+    "cta": "Let's start"
+  },
+  "about": {
+    "title": "About me",
+    "subtitle": "First AI Code — AI Consultant",
+    "body": "I came from the world of computer networks and now I help businesses of all sizes — from restaurants to agencies and enterprises — sell faster and work easier with AI. From CRM to a personal assistant and website, we launch it all in minimal time and stay with you for one month.",
+    "placeholder": "Photo and full résumé coming here soon."
+  },
+  "audience": {
+    "title": "Who is it for?",
+    "items": ["Restaurants", "Agencies", "Shops", "Independent consultants", "Any business", "Any age & field"]
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "subtitle": "Everything you need to know before we start.",
+    "items": [
+      {
+        "q": "Do I need to know how to code to use AI?",
+        "a": "Not at all. The technical part is on me. You know your business; I bring AI into it — without you writing a single line of code."
+      },
+      {
+        "q": "How is the consultation held?",
+        "a": "A 30-minute online session on Google Meet. After payment, your meeting link is generated automatically and emailed to you."
+      },
+      {
+        "q": "How much does it cost?",
+        "a": "$99 for one focused 30-minute session. You walk away with a practical roadmap to start with AI."
+      },
+      {
+        "q": "Am I left alone after the consultation?",
+        "a": "No. If we move forward together, I stay with you for one month — prompting, fixes and real backend and content support. I won't leave you alone."
+      },
+      {
+        "q": "My business is small — is this for me?",
+        "a": "Exactly. From restaurants to agencies, from startups to enterprises — AI can transform any business, regardless of size."
+      }
+    ]
+  },
+  "ctaBand": {
+    "title": "Ready to bring AI into your work?",
+    "subtitle": "One 30-minute session, one clear roadmap.",
+    "cta": "Book a consultation"
+  },
+  "footer": {
+    "tagline": "Smarter business. Faster results.",
+    "rights": "All rights reserved.",
+    "links": "Links",
+    "contact": "Contact",
+    "instagram": "Instagram"
+  },
+  "auth": {
+    "loginTitle": "Log in to your account",
+    "signupTitle": "Create your account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full name",
+    "loginCta": "Log in",
+    "signupCta": "Sign up",
+    "google": "Continue with Google",
+    "or": "or",
+    "haveAccount": "Have an account? Log in",
+    "noAccount": "No account? Sign up",
+    "checkEmail": "A confirmation email was sent. Check your inbox and click the link."
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "subtitle": "Your dashboard — your bookings and sessions live here.",
+    "myBookings": "My bookings",
+    "noBookings": "You don't have any bookings yet.",
+    "bookCta": "Book a consultation",
+    "status": "Status",
+    "meetLink": "Meeting link",
+    "statusLabels": {
+      "pending": "Awaiting payment",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
+  },
+  "booking": {
+    "title": "Book a consultation",
+    "subtitle": "Fill in the form below. I'll get back to you within 24 hours to schedule the session.",
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone number (optional)",
+    "message": "Brief description of your business",
+    "submit": "Send request",
+    "successTitle": "Request received!",
+    "successBody": "I'll reach out within 24 hours to schedule our Google Meet session.",
+    "price": "$99",
+    "duration": "30 min",
+    "includes": ["Live review of your business", "Practical AI roadmap", "Session on Google Meet"],
+    "errorRequired": "Name and email are required.",
+    "errorGeneral": "Something went wrong. Please try again."
+  }
+}
