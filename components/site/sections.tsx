@@ -86,7 +86,7 @@ export function Hero({ dict, locale }: Props) {
           loop
           playsInline
           className="h-full w-full object-contain sm:object-cover"
-          src="/hero-bg.mp4"
+          src="/hero-bg-new.mp4"
         />
         {/* Scroll hint */}
         <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
