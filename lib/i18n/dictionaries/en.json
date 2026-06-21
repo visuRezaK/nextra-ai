@@ -32,6 +32,12 @@
       { "value": "0", "label": "code required" }
     ]
   },
+  "aiQuestion": {
+    "eyebrow": "AI",
+    "question": "What problem did it solve for your business today?",
+    "answer": "If the answer is nothing, it's probably time to have your first AI assistant.",
+    "sub": "A collaborator that works 24 hours a day, never gets tired, and is always ready to respond."
+  },
   "problem": {
     "eyebrow": "The problem",
     "title": "AI complexity shouldn't block your growth",

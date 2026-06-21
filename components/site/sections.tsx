@@ -85,7 +85,7 @@ export function Hero({ dict, locale }: Props) {
           muted
           loop
           playsInline
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain sm:object-cover"
           src="/hero-bg.mp4"
         />
         {/* Scroll hint */}
@@ -96,7 +96,29 @@ export function Hero({ dict, locale }: Props) {
         </div>
       </section>
 
-      {/* Screen 2 — brand name + hero content (light) */}
+      {/* Screen 2 — AI question hook */}
+      <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
+        <div className="mx-auto max-w-3xl px-5 py-24 text-center">
+          <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+            <span className="[font-family:var(--font-inter)] text-accent">{dict.aiQuestion.eyebrow}</span>
+            {" "}
+            {dict.aiQuestion.question}
+          </h2>
+          <p className="mx-auto mt-8 max-w-2xl text-xl font-medium leading-relaxed text-muted sm:text-2xl">
+            {dict.aiQuestion.answer}
+          </p>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted/70">
+            {dict.aiQuestion.sub}
+          </p>
+        </div>
+        <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
+          <svg className="h-6 w-6 text-foreground/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </section>
+
+      {/* Screen 3 — brand name + hero content (light) */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
         <div className="mx-auto max-w-6xl px-5 py-24 text-center">
 
