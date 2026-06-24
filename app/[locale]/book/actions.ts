@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { notifyLead } from "@/lib/chatbot/notify";
 
 export type ContactState = { success: boolean; error?: string } | undefined;
 
@@ -40,6 +41,9 @@ export async function submitContactAction(
       error: locale === "fa" ? "خطایی رخ داد. دوباره امتحان کن." : "Something went wrong. Please try again.",
     };
   }
+
+  // Best-effort owner notification (never blocks the form response).
+  await notifyLead({ name, email, phone, message, source: "web" });
 
   return { success: true };
 }

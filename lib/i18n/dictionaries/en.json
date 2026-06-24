@@ -12,11 +12,30 @@
     "why": "Why me",
     "about": "About",
     "faq": "FAQ",
+    "chat": "Chat with assistant",
     "book": "Book a call",
     "login": "Log in",
     "signup": "Sign up",
     "dashboard": "Dashboard",
     "logout": "Log out"
+  },
+  "chat": {
+    "title": "Chat with the AI assistant",
+    "subtitle": "Ask anything about the services, pricing, or how it works. If you'd like, we can book a consultation right here.",
+    "placeholder": "Type your message…",
+    "send": "Send",
+    "greeting": "Hi! I'm the First AI Code assistant. How can I help you?",
+    "suggestions": [
+      "How much is the consultation?",
+      "How is the consultation held?",
+      "Is it suitable for a small business?"
+    ],
+    "leadSaved": "Your contact details were saved ✅",
+    "thinking": "Typing…",
+    "error": "Something went wrong. Please try again.",
+    "back": "Back to home",
+    "widgetOpen": "Open chat",
+    "widgetClose": "Close chat"
   },
   "hero": {
     "badge": "From network engineer to AI consultant",
@@ -24,7 +43,7 @@
     "title": "Simple,",
     "titleAccent": "faster than you expect",
     "subtitle": "I make AI simple for your business. I bring it into your operation in minimal time — from CRM to website — and stay with you for one month.",
-    "ctaPrimary": "Book a consultation — $99",
+    "ctaPrimary": "Book a consultation — Free",
     "ctaSecondary": "See the consultation",
     "stats": [
       { "value": "Minimal", "label": "time to launch AI" },
@@ -110,9 +129,9 @@
     "points": [
       "Live review of your business and what can be automated",
       "A practical roadmap to start with AI",
-      "Session on Google Meet — link generated automatically after payment"
+      "Session on Google Meet — link generated automatically after you book"
     ],
-    "price": "$99",
+    "price": "Free",
     "priceUnit": "/ 30 min",
     "cta": "Book a consultation"
   },
@@ -192,7 +211,7 @@
       },
       {
         "q": "How much does it cost?",
-        "a": "$99 for one focused 30-minute session. You walk away with a practical roadmap to start with AI."
+        "a": "It's completely free — one focused 30-minute session. You walk away with a practical roadmap to start with AI."
       },
       {
         "q": "Am I left alone after the consultation?",
@@ -255,7 +274,7 @@
     "submit": "Send request",
     "successTitle": "Request received!",
     "successBody": "I'll reach out within 24 hours to schedule our Google Meet session.",
-    "price": "$99",
+    "price": "Free",
     "duration": "30 min",
     "includes": ["Live review of your business", "Practical AI roadmap", "Session on Google Meet"],
     "errorRequired": "Name and email are required.",

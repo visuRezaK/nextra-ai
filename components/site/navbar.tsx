@@ -12,6 +12,7 @@ type NavDict = {
   why: string;
   about: string;
   faq: string;
+  chat: string;
   book: string;
   login: string;
   dashboard: string;
@@ -36,6 +37,7 @@ export function Navbar({
     { href: `${base}#why`, label: nav.why },
     { href: `${base}#about`, label: nav.about },
     { href: `${base}#faq`, label: nav.faq },
+    { href: `${base}/chat`, label: nav.chat },
   ];
 
   return (

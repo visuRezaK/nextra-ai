@@ -5,6 +5,7 @@ import "../globals.css";
 import { isLocale, locales, localeDirection, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { ChatWidget } from "@/components/chat/chat-widget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -68,12 +69,14 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   const dir = localeDirection[locale as Locale];
+  const dict = await getDictionary(locale as Locale);
 
   return (
     <html lang={locale} dir={dir} className={`${inter.variable} ${vazir.variable}`}>
       <body className="bg-background text-foreground antialiased">
         {children}
         <ScrollToTop />
+        <ChatWidget locale={locale as Locale} dict={dict.chat} />
       </body>
     </html>
   );
