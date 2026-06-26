@@ -1,10 +1,10 @@
 {
   "meta": {
-    "title": "FirstAICode — AI Consulting",
-    "description": "I bring AI into your business in minimal time — from CRM to website — with one month of backend and content support."
+    "title": "Nextra AI Consulting",
+    "description": "I bring AI into your business in minimal time — from CRM to website and chatbot — with one month of backend and content support."
   },
   "brand": {
-    "name": "First AI Code",
+    "name": "Nextra AI Consulting",
     "tagline": "Smarter business. Faster results."
   },
   "nav": {
@@ -24,11 +24,12 @@
     "subtitle": "Ask anything about the services, pricing, or how it works. If you'd like, we can book a consultation right here.",
     "placeholder": "Type your message…",
     "send": "Send",
-    "greeting": "Hi! I'm the First AI Code assistant. How can I help you?",
+    "greeting": "Hi! I'm the Nextra AI Consulting assistant. How can I help you?",
     "suggestions": [
-      "How much is the consultation?",
-      "How is the consultation held?",
-      "Is it suitable for a small business?"
+      "What services do you offer?",
+      "How can AI help my business?",
+      "How much does a project cost?",
+      "Where do I start?"
     ],
     "leadSaved": "Your contact details were saved ✅",
     "thinking": "Typing…",
@@ -42,25 +43,26 @@
     "headline": "AI — the answer to your business needs",
     "title": "Simple,",
     "titleAccent": "faster than you expect",
-    "subtitle": "I make AI simple for your business. I bring it into your operation in minimal time — from CRM to website — and stay with you for one month.",
+    "subtitle": "I make AI simple for your business. I bring it into your operation in minimal time — from CRM to website and chatbot — and stay with you for one month.",
     "ctaPrimary": "Book a consultation — Free",
     "ctaSecondary": "See the consultation",
     "stats": [
       { "value": "Minimal", "label": "time to launch AI" },
       { "value": "1 month", "label": "backend & content support" },
-      { "value": "0", "label": "code required" }
+      { "value": "24/7", "label": "A chatbot that answers your customers" }
     ]
   },
   "aiQuestion": {
     "eyebrow": "AI",
     "question": "What problem did it solve for your business today?",
     "answer": "If the answer is nothing, it's probably time to have your first AI assistant.",
-    "sub": "A collaborator that works 24 hours a day, never gets tired, and is always ready to respond."
+    "sub": "A collaborator that works 24 hours a day, never gets tired, and is always ready to respond.",
+    "quote": "In many jobs, AI won't replace humans. But humans who use AI will likely replace those who don't."
   },
   "problem": {
     "eyebrow": "The problem",
     "title": "AI complexity shouldn't block your growth",
-    "subtitle": "Here's what AI complexity really means: not knowing where to start, which tool to pick, or how much it costs. My job is to make that complexity simple for you.",
+    "subtitle": "Here's what AI complexity really means: not knowing where to start, which tool to pick, or how much it costs — and maybe worrying about data security or replacing people too. My job is to make that complexity and those worries simple and clear for you.",
     "items": [
       {
         "title": "You don't know where to start",
@@ -73,6 +75,18 @@
       {
         "title": "Competitors are pulling ahead",
         "desc": "They adopt AI, sell faster, and you fall behind. Customers go where they get a faster answer."
+      },
+      {
+        "title": "Afraid it will replace people",
+        "desc": "Worried AI will replace your staff or the human touch with customers. My goal isn't replacement — it's handing repetitive work to AI so you and your team focus on what matters."
+      },
+      {
+        "title": "Worried about data security & privacy",
+        "desc": "Afraid your business and customer data ends up where it shouldn't. Your information stays private and is only used where you want it to be."
+      },
+      {
+        "title": "Unsure it's accurate",
+        "desc": "Worried AI will answer wrong or make things up. That's why I tune it on your real business information and stay with you for one month until you're sure it works right."
       }
     ]
   },
@@ -105,7 +119,7 @@
   },
   "plan": {
     "eyebrow": "The plan",
-    "title": "The 3-step First AI Code path",
+    "title": "The 3-step Nextra AI Consulting path",
     "subtitle": "A simple, clear path — from diagnosis to execution and support. You know your business; the rest is on me.",
     "steps": [
       {
@@ -161,7 +175,7 @@
     ]
   },
   "why": {
-    "title": "Why First AI Code?",
+    "title": "Why Nextra AI Consulting?",
     "subtitle": "A computer-networks specialist who saw AI could become the growth backbone of any business — and built that bridge.",
     "items": [
       {
@@ -189,8 +203,8 @@
   },
   "about": {
     "title": "About me",
-    "subtitle": "First AI Code — AI Consultant",
-    "body": "I came from the world of computer networks and now I help businesses of all sizes — from restaurants to agencies and enterprises — sell faster and work easier with AI. From CRM to a personal assistant and website, we launch it all in minimal time and stay with you for one month.",
+    "subtitle": "Nextra AI Consulting — AI Consultant",
+    "body": "I came from the world of computer networks and now I help businesses of all sizes — from restaurants to agencies and enterprises — sell faster and work easier with AI. From CRM to a personal assistant, website and chatbot, we launch it all in minimal time and stay with you for one month.",
     "placeholder": "Photo and full résumé coming here soon."
   },
   "audience": {
@@ -206,20 +220,53 @@
         "a": "Not at all. The technical part is on me. You know your business; I bring AI into it — without you writing a single line of code."
       },
       {
-        "q": "How is the consultation held?",
-        "a": "A 30-minute online session on Google Meet. After payment, your meeting link is generated automatically and emailed to you."
-      },
-      {
-        "q": "How much does it cost?",
-        "a": "It's completely free — one focused 30-minute session. You walk away with a practical roadmap to start with AI."
-      },
-      {
         "q": "Am I left alone after the consultation?",
         "a": "No. If we move forward together, I stay with you for one month — prompting, fixes and real backend and content support. I won't leave you alone."
       },
       {
         "q": "My business is small — is this for me?",
         "a": "Exactly. From restaurants to agencies, from startups to enterprises — AI can transform any business, regardless of size."
+      }
+    ]
+  },
+  "chatbot_faq": {
+    "title": "Common questions about Nextra AI Consulting services",
+    "items": [
+      {
+        "q": "What services do you offer?",
+        "a": "We help businesses use AI to do everyday work faster and smarter. Services include designing and building AI chatbots, automating workflows, connecting AI to your website and CRM, and AI consulting and training for businesses. Tell me what your business is and I can suggest options tailored to your field."
+      },
+      {
+        "q": "How can AI help my business?",
+        "a": "Depending on your business, AI can provide 24/7 customer responses, reduce time spent on repetitive tasks, increase conversion rates, lower operating costs, capture and follow up on leads, and support your sales team. Tell me your industry and I'll share real examples from it."
+      },
+      {
+        "q": "Is AI a good fit for my business?",
+        "a": "In most cases, yes. AI adds a lot of value for businesses that deal with customers, sales, booking, support, or information management. Share your business type, team size, and biggest current challenge, and we'll look at which solution delivers the most value."
+      },
+      {
+        "q": "How much does a project cost?",
+        "a": "Cost depends on factors like the features you need, how many systems must be connected, and the type of automation. That's why we first review your needs and then give a clear technical proposal and price. The initial consultation is free and with no obligation."
+      },
+      {
+        "q": "Do I need a website to use AI?",
+        "a": "No. AI solutions can reach your customers on your website, WhatsApp, Instagram, Telegram, or even through a dedicated link. If you don't have a website yet, we can suggest the best option."
+      },
+      {
+        "q": "Does the chatbot only answer questions?",
+        "a": "Not only that. Beyond answering, the chatbot can capture and store customer information, ask targeted questions, and prepare the user's needs for a consultation. More advanced capabilities like CRM integration or automatic booking can be built in custom projects."
+      },
+      {
+        "q": "Is my data secure?",
+        "a": "Data security matters a lot to us. We use trusted services and manage access according to security best practices. If your business has specific privacy requirements, we review and propose a solution that fits them."
+      },
+      {
+        "q": "How is a project carried out?",
+        "a": "The process usually includes an intro and needs-assessment session, analysis of your business processes, a technical proposal and timeline, design and implementation, testing and training, and finally delivery plus one month of support. You stay informed at every step."
+      },
+      {
+        "q": "Where do I start?",
+        "a": "Just tell me your business type, your most important current challenge, and the goal you want to reach with AI. Based on that, I'll suggest the best solutions and, if you'd like, arrange a free consultation."
       }
     ]
   },

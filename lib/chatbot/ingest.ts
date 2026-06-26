@@ -55,6 +55,10 @@ function buildChunks(dict: Dictionary): Chunk[] {
     chunks.push({ category: "faq", title: item.q, content: `سؤال: ${item.q}\nپاسخ: ${item.a}` });
   }
 
+  for (const item of dict.chatbot_faq.items) {
+    chunks.push({ category: "chatbot_faq", title: item.q, content: `${item.q}\n${item.a}` });
+  }
+
   for (const row of dict.transform.rows) {
     chunks.push({ category: "transform", title: null, content: `قبل: ${row.before} — بعد: ${row.after}` });
   }

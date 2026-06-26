@@ -14,25 +14,82 @@ const base = {
 };
 
 export function Logo({ className }: { className?: string }) {
+  // Italic N — thin bars (5px), italic shift 4px at top → 0 at bottom
+  // s(y) = 4*(42-y)/36
+  //
+  // Base (non-italic) x ranges:
+  //   Left bar : 7–12   Diagonal: 12–20 (left) / 20–27+13*(y-6)/36 wait...
+  //   Left edge of diag: 12 + 15*(y-6)/36   Right edge: 20 + 15*(y-6)/36
+  //   Right bar: 35–40
+  //
+  // Final coords at key y values (base + italic shift):
+  //   y=6  s=4.0 → LB [11,16]  D [16,24]  RB [39,44]
+  //   y=18 s=2.7 → LB [9.7,14.7] D [19.7,27.7] RB [37.7,42.7]
+  //   y=30 s=1.3 → LB [8.3,13.3] D [23.3,31.3] RB [36.3,41.3]
+  //   y=42 s=0   → LB [7,12]    D [27,35]    RB [35,40]
   return (
     <svg
       className={className}
-      width="34"
-      height="34"
+      width="28"
+      height="28"
       viewBox="0 0 48 48"
       fill="none"
       aria-hidden="true"
     >
-      <path
-        d="M24 4 8 24l16 20 16-20L24 4Z"
-        stroke="var(--brand-sky)"
-        strokeWidth="2"
-        opacity="0.35"
-      />
-      <path d="m19 17-6 7 6 7" stroke="var(--brand-sky-light)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="m29 17 6 7-6 7" stroke="var(--brand-sky)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="24" cy="9" r="1.8" fill="var(--brand-sky-light)" />
-      <circle cx="24" cy="39" r="1.8" fill="var(--brand-sky)" />
+      {/* Light background */}
+      <rect x="1" y="1" width="46" height="46" rx="11" fill="#eff6ff" />
+
+      {/* ── Left bar — warm ── */}
+      <polygon points="11,6  16,6  14.7,18"           fill="#f9d71c" />
+      <polygon points="11,6  14.7,18 9.7,18"          fill="#f5a623" />
+      <polygon points="9.7,18 14.7,18 13.3,30"        fill="#e67e22" />
+      <polygon points="9.7,18 13.3,30  8.3,30"        fill="#e74c3c" />
+      <polygon points="8.3,30 13.3,30 12,42"          fill="#e74c3c" />
+      <polygon points="8.3,30 12,42   7,42"           fill="#c0392b" />
+
+      {/* ── Diagonal parallelogram — warm→cool ── */}
+      <polygon points="16,6   24,6   19.7,18"         fill="#f5a623" />
+      <polygon points="24,6   27.7,18 19.7,18"        fill="#e67e22" />
+      <polygon points="19.7,18 27.7,18 23.3,30"       fill="#1abc9c" />
+      <polygon points="27.7,18 31.3,30 23.3,30"       fill="#16a085" />
+      <polygon points="23.3,30 31.3,30 27,42"         fill="#2980b9" />
+      <polygon points="31.3,30 35,42   27,42"         fill="#1a5276" />
+
+      {/* ── Right bar — cool ── */}
+      <polygon points="39,6   44,6   42.7,18"         fill="#76d7c4" />
+      <polygon points="39,6   42.7,18 37.7,18"        fill="#1abc9c" />
+      <polygon points="37.7,18 42.7,18 41.3,30"       fill="#3498db" />
+      <polygon points="37.7,18 41.3,30 36.3,30"       fill="#2980b9" />
+      <polygon points="36.3,30 41.3,30 40,42"         fill="#2471a3" />
+      <polygon points="36.3,30 40,42  35,42"          fill="#1a5276" />
+
+      {/* ── Facet dividers ── */}
+      <g stroke="white" strokeWidth="0.6" opacity="0.32">
+        {/* left bar */}
+        <line x1="11"   y1="6"    x2="14.7" y2="18" />
+        <line x1="9.7"  y1="18"   x2="13.3" y2="30" />
+        <line x1="8.3"  y1="30"   x2="12"   y2="42" />
+        <line x1="9.7"  y1="18"   x2="14.7" y2="18" />
+        <line x1="8.3"  y1="30"   x2="13.3" y2="30" />
+        {/* diagonal */}
+        <line x1="19.7" y1="18"   x2="27.7" y2="18" />
+        <line x1="23.3" y1="30"   x2="31.3" y2="30" />
+        <line x1="24"   y1="6"    x2="19.7" y2="18" />
+        <line x1="27.7" y1="18"   x2="23.3" y2="30" />
+        <line x1="31.3" y1="30"   x2="27"   y2="42" />
+        {/* right bar */}
+        <line x1="39"   y1="6"    x2="42.7" y2="18" />
+        <line x1="37.7" y1="18"   x2="41.3" y2="30" />
+        <line x1="36.3" y1="30"   x2="40"   y2="42" />
+        <line x1="37.7" y1="18"   x2="42.7" y2="18" />
+        <line x1="36.3" y1="30"   x2="41.3" y2="30" />
+      </g>
+
+      {/* ── Node dots ── */}
+      <circle cx="16"  cy="6"  r="1.2" fill="white" opacity="0.85" />
+      <circle cx="24"  cy="6"  r="1.2" fill="white" opacity="0.85" />
+      <circle cx="27"  cy="42" r="1.2" fill="white" opacity="0.85" />
+      <circle cx="35"  cy="42" r="1.2" fill="white" opacity="0.85" />
     </svg>
   );
 }

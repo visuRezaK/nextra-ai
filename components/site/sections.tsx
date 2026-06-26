@@ -110,6 +110,9 @@ export function Hero({ dict, locale }: Props) {
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted/70">
             {dict.aiQuestion.sub}
           </p>
+          <p className="mx-auto mt-10 max-w-2xl border-t border-border/60 pt-8 text-lg font-semibold leading-relaxed text-foreground/90 sm:text-xl">
+            {dict.aiQuestion.quote}
+          </p>
         </div>
         <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
           <svg className="h-6 w-6 text-foreground/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">

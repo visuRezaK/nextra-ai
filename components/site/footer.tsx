@@ -11,10 +11,12 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
     <footer className="border-t border-border/60 bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <Link href={base} className="flex items-center gap-2.5">
+          <Link href={base} className="flex items-center gap-2.5" dir="ltr">
             <Logo />
             <span className="flex flex-col leading-none">
-              <span className="text-lg font-extrabold">{dict.brand.name}</span>
+              <span className="text-lg font-extrabold">
+                {dict.brand.name.replace(/\s*Consulting$/i, "")}
+              </span>
               <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
                 Consulting
               </span>
@@ -54,12 +56,12 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
               <a
-                href="https://instagram.com/rezakatanchi"
+                href="https://instagram.com/reza.katanchi"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-foreground"
               >
-                {dict.footer.instagram} · @rezakatanchi
+                {dict.footer.instagram} · @reza.katanchi
               </a>
             </li>
           </ul>
