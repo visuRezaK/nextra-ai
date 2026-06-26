@@ -1,9 +1,23 @@
 import { ButtonLink } from "@/components/ui/button";
-import { IconAlert, IconArrow, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
+import { IconAlert, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
+import { ImageCarouselHero } from "@/components/ui/ai-image-generator-hero";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 
 type Props = { dict: Dictionary; locale: Locale };
+
+// AI-themed imagery for the rotating hero carousel (Screen 3).
+// TODO: replace these Unsplash URLs with owned assets in /public for production.
+const HERO_CAROUSEL_IMAGES = [
+  { id: "1", src: "https://images.unsplash.com/photo-1684369176170-463e84248b70?auto=format&fit=crop&q=60&w=900", alt: "AI 1", rotation: -15 },
+  { id: "2", src: "https://plus.unsplash.com/premium_photo-1677269465314-d5d2247a0b0c?auto=format&fit=crop&q=60&w=900", alt: "AI 2", rotation: -8 },
+  { id: "3", src: "https://images.unsplash.com/photo-1524673360092-e07b7ae58845?auto=format&fit=crop&q=60&w=900", alt: "AI 3", rotation: 5 },
+  { id: "4", src: "https://plus.unsplash.com/premium_photo-1680610653084-6e4886519caf?auto=format&fit=crop&q=60&w=900", alt: "AI 4", rotation: 12 },
+  { id: "5", src: "https://plus.unsplash.com/premium_photo-1680608979589-e9349ed066d5?auto=format&fit=crop&q=60&w=900", alt: "AI 5", rotation: -12 },
+  { id: "6", src: "https://images.unsplash.com/photo-1562575214-da9fcf59b907?auto=format&fit=crop&q=60&w=900", alt: "AI 6", rotation: 8 },
+  { id: "7", src: "https://plus.unsplash.com/premium_photo-1676637656210-390da73f4951?auto=format&fit=crop&q=60&w=900", alt: "AI 7", rotation: 8 },
+  { id: "8", src: "https://images.unsplash.com/photo-1664448003794-2d446c53dcae?auto=format&fit=crop&q=60&w=900", alt: "AI 8", rotation: 8 },
+];
 
 function SectionHeading({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {
   return (
@@ -74,8 +88,7 @@ export function Transform({ dict }: Props) {
   );
 }
 
-export function Hero({ dict, locale }: Props) {
-  const base = `/${locale}`;
+export function Hero({ dict }: Props) {
   return (
     <>
       {/* Screen 1 — video only, no overlay text */}
@@ -121,45 +134,13 @@ export function Hero({ dict, locale }: Props) {
         </div>
       </section>
 
-      {/* Screen 3 — brand name + hero content (light) */}
-      <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
-        <div className="mx-auto max-w-6xl px-5 py-24 text-center">
-
-          {/* Headline */}
-          <h1 className="mx-auto max-w-4xl text-4xl font-black leading-tight tracking-tight sm:text-6xl">
-            {dict.hero.headline}
-          </h1>
-
-          {/* Tagline */}
-          <h2 className="mx-auto mt-5 max-w-3xl text-2xl font-bold leading-tight tracking-tight text-muted sm:text-3xl">
-            {dict.hero.title}{" "}
-            <span className="text-gradient">{dict.hero.titleAccent}</span>
-          </h2>
-
-          {/* Subtitle */}
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-            {dict.hero.subtitle}
-          </p>
-
-          {/* CTA — booking lives only on the first service; keep secondary nav here */}
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <ButtonLink href={`${base}#services`} variant="secondary" size="lg" className="group">
-              {dict.hero.ctaSecondary}
-              <IconArrow className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
-            </ButtonLink>
-          </div>
-
-          {/* Stats */}
-          <div className="mx-auto mt-16 grid max-w-2xl grid-cols-3 gap-4">
-            {dict.hero.stats.map((s) => (
-              <div key={s.label} className="card-surface px-4 py-5">
-                <div className="text-2xl font-black text-accent sm:text-3xl">{s.value}</div>
-                <div className="mt-1 text-xs text-muted sm:text-sm">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Screen 3 — rotating-carousel hero (brand headline + stats as features) */}
+      <ImageCarouselHero
+        title={dict.hero.headline}
+        description={dict.hero.subtitle}
+        images={HERO_CAROUSEL_IMAGES}
+        features={dict.hero.stats.map((s) => ({ title: s.value, description: s.label }))}
+      />
     </>
   );
 }
