@@ -61,6 +61,7 @@ export function ChatWidget({
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? dict.widgetClose : dict.widgetOpen}
         aria-expanded={open}
+        title={open ? undefined : dict.widgetOpen}
         className="fixed bottom-6 left-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-[0_10px_30px_-10px_rgba(14,165,233,0.7)] transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
       >
         {open ? (
