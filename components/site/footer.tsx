@@ -64,6 +64,14 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
                 {dict.footer.instagram} · @reza.katanchi
               </a>
             </li>
+            <li>
+              <a
+                href="mailto:rezakatanchi7@gmail.com"
+                className="hover:text-foreground"
+              >
+                {dict.footer.email} · rezakatanchi7@gmail.com
+              </a>
+            </li>
           </ul>
         </div>
       </div>
