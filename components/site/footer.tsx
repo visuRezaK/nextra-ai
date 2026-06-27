@@ -61,7 +61,7 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
                 rel="noreferrer"
                 className="hover:text-foreground"
               >
-                {dict.footer.instagram} · @reza.katanchi
+                {dict.footer.instagram} · <span dir="ltr">@reza.katanchi</span>
               </a>
             </li>
             <li>
