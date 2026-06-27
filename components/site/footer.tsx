@@ -11,15 +11,15 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
     <footer className="border-t border-border/60 bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <Link href={base} className="flex items-center gap-2.5" dir="ltr">
-            <Logo />
-            <span className="flex flex-col leading-none">
-              <span className="text-lg font-extrabold">
-                {dict.brand.name.replace(/\s*Consulting$/i, "")}
+          <Link href={base} aria-label={dict.brand.name} className="flex flex-col items-center leading-none" dir="ltr">
+            <span className="flex items-center gap-0">
+              <Logo className="h-[22px] w-[22px]" />
+              <span className="text-lg font-extrabold tracking-tight">
+                {dict.brand.name.replace(/\s*Consulting$/i, "").replace(/^N/, "")}
               </span>
-              <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-                Consulting
-              </span>
+            </span>
+            <span className="mt-1 ml-[0.28em] text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+              Consulting
             </span>
           </Link>
           <p className="mt-3 max-w-xs text-sm text-muted">{dict.footer.tagline}</p>
