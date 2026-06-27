@@ -10,7 +10,7 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
   return (
     <footer className="border-t border-border/60 bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:grid-cols-2 lg:grid-cols-3">
-        <div>
+        <div className="flex flex-col items-center">
           <Link href={base} aria-label={dict.brand.name} className="flex flex-col items-center leading-none" dir="ltr">
             <span className="flex items-center gap-0">
               <Logo className="h-[22px] w-[22px]" />
