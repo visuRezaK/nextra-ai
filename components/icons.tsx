@@ -17,11 +17,6 @@ export function Logo({ className }: { className?: string }) {
   // Italic N — thin bars (5px), italic shift 4px at top → 0 at bottom
   // s(y) = 4*(42-y)/36
   //
-  // Base (non-italic) x ranges:
-  //   Left bar : 7–12   Diagonal: 12–20 (left) / 20–27+13*(y-6)/36 wait...
-  //   Left edge of diag: 12 + 15*(y-6)/36   Right edge: 20 + 15*(y-6)/36
-  //   Right bar: 35–40
-  //
   // Final coords at key y values (base + italic shift):
   //   y=6  s=4.0 → LB [11,16]  D [16,24]  RB [39,44]
   //   y=18 s=2.7 → LB [9.7,14.7] D [19.7,27.7] RB [37.7,42.7]
@@ -65,19 +60,16 @@ export function Logo({ className }: { className?: string }) {
 
       {/* ── Facet dividers ── */}
       <g stroke="white" strokeWidth="0.6" opacity="0.32">
-        {/* left bar */}
         <line x1="11"   y1="6"    x2="14.7" y2="18" />
         <line x1="9.7"  y1="18"   x2="13.3" y2="30" />
         <line x1="8.3"  y1="30"   x2="12"   y2="42" />
         <line x1="9.7"  y1="18"   x2="14.7" y2="18" />
         <line x1="8.3"  y1="30"   x2="13.3" y2="30" />
-        {/* diagonal */}
         <line x1="19.7" y1="18"   x2="27.7" y2="18" />
         <line x1="23.3" y1="30"   x2="31.3" y2="30" />
         <line x1="24"   y1="6"    x2="19.7" y2="18" />
         <line x1="27.7" y1="18"   x2="23.3" y2="30" />
         <line x1="31.3" y1="30"   x2="27"   y2="42" />
-        {/* right bar */}
         <line x1="39"   y1="6"    x2="42.7" y2="18" />
         <line x1="37.7" y1="18"   x2="41.3" y2="30" />
         <line x1="36.3" y1="30"   x2="40"   y2="42" />
@@ -90,6 +82,55 @@ export function Logo({ className }: { className?: string }) {
       <circle cx="24"  cy="6"  r="1.2" fill="white" opacity="0.85" />
       <circle cx="27"  cy="42" r="1.2" fill="white" opacity="0.85" />
       <circle cx="35"  cy="42" r="1.2" fill="white" opacity="0.85" />
+    </svg>
+  );
+}
+
+export function BotMark({ className }: { className?: string }) {
+  // Friendly AI robot head — used as the chat-widget avatar.
+  return (
+    <svg
+      className={className}
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="botHead" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5a623" />
+          <stop offset="45%" stopColor="#e67e22" />
+          <stop offset="75%" stopColor="#1abc9c" />
+          <stop offset="100%" stopColor="#2980b9" />
+        </linearGradient>
+      </defs>
+
+      {/* Circular tile */}
+      <circle cx="24" cy="24" r="23" fill="#eff6ff" />
+
+      {/* Antenna */}
+      <line x1="24" y1="13" x2="24" y2="8" stroke="#e67e22" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="24" cy="7" r="2" fill="#f9d71c" />
+
+      {/* Ears */}
+      <rect x="8" y="22" width="3" height="8" rx="1.5" fill="#2980b9" />
+      <rect x="37" y="22" width="3" height="8" rx="1.5" fill="#2980b9" />
+
+      {/* Head */}
+      <rect x="11" y="13" width="26" height="24" rx="8" fill="url(#botHead)" />
+
+      {/* Face screen */}
+      <rect x="15" y="18" width="18" height="14" rx="5" fill="#0f2540" />
+
+      {/* Eyes */}
+      <circle cx="20.5" cy="25" r="2.4" fill="#5eead4" />
+      <circle cx="27.5" cy="25" r="2.4" fill="#5eead4" />
+      <circle cx="20" cy="24.3" r="0.8" fill="white" />
+      <circle cx="27" cy="24.3" r="0.8" fill="white" />
+
+      {/* Smile */}
+      <path d="M20 29.5q4 2.5 8 0" stroke="#5eead4" strokeWidth="1.4" strokeLinecap="round" fill="none" />
     </svg>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChatPanel, type ChatDict } from "./chat-panel";
+import { BotMark } from "@/components/icons";
 import type { Locale } from "@/lib/i18n/config";
 
 type WidgetDict = ChatDict & {
@@ -33,7 +34,10 @@ export function ChatWidget({
       {open && (
         <div className="fixed bottom-24 left-4 z-50 flex h-[min(70vh,32rem)] w-[calc(100vw-2rem)] flex-col rounded-2xl border border-border bg-background shadow-2xl sm:left-6 sm:w-96">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
-            <span className="text-sm font-bold">{dict.title}</span>
+            <span className="flex items-center gap-2">
+              <BotMark className="h-7 w-7 rounded-full" />
+              <span className="text-sm font-bold">{dict.title}</span>
+            </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -57,20 +61,29 @@ export function ChatWidget({
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? dict.widgetClose : dict.widgetOpen}
         aria-expanded={open}
-        className="fixed bottom-6 left-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-[0_10px_30px_-10px_rgba(14,165,233,0.7)] transition-all duration-200 hover:bg-accent-hover hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+        className="fixed bottom-6 left-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-[0_10px_30px_-10px_rgba(14,165,233,0.7)] transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
       >
         {open ? (
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <span className="flex h-full w-full items-center justify-center rounded-full bg-accent text-accent-foreground">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </span>
         ) : (
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.3-3.9A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
+          <>
+            <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+              <BotMark className="h-full w-full" />
+            </span>
+            <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-accent text-accent-foreground">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.3-3.9A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+            </span>
+          </>
         )}
       </button>
     </>

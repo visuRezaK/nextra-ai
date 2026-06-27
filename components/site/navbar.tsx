@@ -43,15 +43,15 @@ export function Navbar({
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5">
-        <Link href={base} className="flex items-center gap-2.5" dir="ltr">
-          <Logo />
-          <span className="flex flex-col leading-none">
+        <Link href={base} aria-label={brand} className="flex flex-col items-center leading-none" dir="ltr">
+          <span className="flex items-center gap-0">
+            <Logo className="h-[22px] w-[22px]" />
             <span className="text-lg font-extrabold tracking-tight">
-              {brand.replace(/\s*Consulting$/i, "")}
+              {brand.replace(/\s*Consulting$/i, "").replace(/^N/, "")}
             </span>
-            <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-              Consulting
-            </span>
+          </span>
+          <span className="mt-1 ml-[0.28em] text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+            Consulting
           </span>
         </Link>
 
