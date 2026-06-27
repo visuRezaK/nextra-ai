@@ -91,25 +91,7 @@ export function Transform({ dict }: Props) {
 export function Hero({ dict }: Props) {
   return (
     <>
-      {/* Screen 1 — video only, no overlay text */}
-      <section className="relative h-screen overflow-hidden" style={{ background: "#071020" }}>
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="h-full w-full object-contain sm:object-cover"
-          src="/hero-bg-new.mp4"
-        />
-        {/* Scroll hint */}
-        <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-          <svg className="h-6 w-6 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </section>
-
-      {/* Screen 2 — AI question hook */}
+      {/* Screen 1 — AI question hook */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
           <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
