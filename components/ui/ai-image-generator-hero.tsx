@@ -23,14 +23,9 @@ interface ImageCarouselHeroProps {
   features?: Array<{ title: string; description: string }>;
 }
 
-export function ImageCarouselHero({
-  title,
-  description,
-  ctaText,
-  onCtaClick,
-  images,
-  features = [],
-}: ImageCarouselHeroProps) {
+// The rotating ring of images. Extracted so it can be reused outside the full
+// hero (e.g. in place of a static image on another screen).
+export function ImageRing({ images }: { images: ImageCard[] }) {
   // Static ring layout, computed once. The whole ring is rotated as a single
   // GPU-composited layer via CSS (see `.hero-ring` in globals.css) — nothing is
   // re-rastered per frame, which is what keeps it smooth on mobile.
@@ -45,6 +40,41 @@ export function ImageCarouselHero({
   });
 
   return (
+    <div className="relative mb-12 h-96 w-full max-w-6xl sm:mb-16 sm:h-[500px]">
+      <div className="hero-ring absolute inset-0 flex items-center justify-center">
+        {ringCards.map((image) => (
+          <div
+            key={image.id}
+            className="absolute h-40 w-32 sm:h-48 sm:w-40"
+            style={{
+              transform: `translate(${image.x}px, ${image.y}px) rotate(${image.rotation}deg)`,
+            }}
+          >
+            <div className="group relative h-full w-full overflow-hidden rounded-2xl shadow-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={image.src}
+                alt={image.alt}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ImageCarouselHero({
+  title,
+  description,
+  ctaText,
+  onCtaClick,
+  features = [],
+}: ImageCarouselHeroProps) {
+  return (
     <div className="relative w-full min-h-screen overflow-hidden bg-background">
       {/* Animated background glow — desktop only; animated blur jitters on iOS Safari */}
       <div className="pointer-events-none absolute inset-0 hidden overflow-hidden md:block">
@@ -53,32 +83,6 @@ export function ImageCarouselHero({
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
-        {/* Carousel */}
-        <div className="relative mb-12 h-96 w-full max-w-6xl sm:mb-16 sm:h-[500px]">
-          <div className="hero-ring absolute inset-0 flex items-center justify-center">
-            {ringCards.map((image) => (
-              <div
-                key={image.id}
-                className="absolute h-40 w-32 sm:h-48 sm:w-40"
-                style={{
-                  transform: `translate(${image.x}px, ${image.y}px) rotate(${image.rotation}deg)`,
-                }}
-              >
-                <div className="group relative h-full w-full overflow-hidden rounded-2xl shadow-2xl">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Content */}
         <div className="relative z-20 mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <h1 className="mb-4 text-balance text-4xl font-bold leading-tight text-foreground sm:mb-6 sm:text-5xl lg:text-6xl">

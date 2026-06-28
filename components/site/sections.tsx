@@ -1,6 +1,6 @@
 import { ButtonLink } from "@/components/ui/button";
 import { IconAlert, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
-import { ImageCarouselHero } from "@/components/ui/ai-image-generator-hero";
+import { ImageRing } from "@/components/ui/ai-image-generator-hero";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -88,22 +88,72 @@ export function Transform({ dict }: Props) {
   );
 }
 
-export function Hero({ dict }: Props) {
+export function Hero({ dict, locale }: Props) {
+  const sh = dict.splitHero;
   return (
     <>
-      {/* Screen 1 — AI question hook */}
+      {/* Screen 1 — split hero (owner photo + intro + consultation CTA).
+          Photo is a placeholder until the owner's image is added. */}
+      <section className="bg-grid relative flex min-h-screen items-center overflow-hidden">
+        <div className="mx-auto w-full max-w-6xl px-5 py-24">
+          <div className="grid items-center gap-10 rounded-[2.5rem] border border-border/60 bg-surface-2/40 p-8 shadow-[0_30px_80px_-40px_rgba(14,165,233,0.35)] sm:p-12 lg:grid-cols-2 lg:gap-14">
+            {/* Text column */}
+            <div className="text-center lg:text-start">
+              <p className="text-base font-bold text-accent sm:text-lg">{sh.team}</p>
+              <h1 className="mt-3 text-3xl font-black leading-tight tracking-tight text-accent sm:text-5xl">
+                {sh.headingAccent}
+              </h1>
+              <h2 className="mt-3 text-2xl font-black leading-tight tracking-tight sm:text-4xl">
+                {sh.heading}
+              </h2>
+              <p className="mt-5 text-lg font-medium text-muted sm:text-xl">{sh.tagline}</p>
+              <ul className="mx-auto mt-6 max-w-xl space-y-3 text-start lg:mx-0">
+                {sh.points.map((point) => (
+                  <li
+                    key={point}
+                    className="flex items-start gap-3 text-sm leading-relaxed text-muted sm:text-base"
+                  >
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex justify-center lg:justify-start">
+                <ButtonLink href={`/${locale}/book`} size="lg">
+                  {sh.cta}
+                </ButtonLink>
+              </div>
+            </div>
+            {/* Image column — placeholder frame until the owner's photo is added */}
+            <div className="order-first lg:order-none">
+              <div className="relative mx-auto flex aspect-[4/5] w-full max-w-sm items-center justify-center overflow-hidden rounded-3xl border border-dashed border-accent/40 bg-gradient-to-br from-accent/10 via-surface to-background">
+                <div className="flex flex-col items-center gap-3 px-6 text-center text-muted">
+                  <svg
+                    className="h-16 w-16 text-accent/50"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 19.5a7.5 7.5 0 0 1 15 0v.75H4.5v-.75Z"
+                    />
+                  </svg>
+                  <span className="text-sm font-medium">{sh.imageLabel}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Screen 2 — AI question hook */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-          <div className="mx-auto mb-10 max-w-xl overflow-hidden rounded-3xl border border-border/60 shadow-[0_24px_60px_-28px_rgba(14,165,233,0.35)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/nextra-robot.webp"
-              alt="Nextra — دستیار هوش مصنوعی"
-              width={1100}
-              height={600}
-              className="h-auto w-full"
-            />
-          </div>
+          {/* Robot image removed for now — using the rotating image ring instead */}
+          <ImageRing images={HERO_CAROUSEL_IMAGES} />
           <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
             <span className="[font-family:var(--font-inter)] text-accent">{dict.aiQuestion.eyebrow}</span>
             {" "}
@@ -125,14 +175,6 @@ export function Hero({ dict }: Props) {
           </svg>
         </div>
       </section>
-
-      {/* Screen 3 — rotating-carousel hero (brand headline + stats as features) */}
-      <ImageCarouselHero
-        title={dict.hero.headline}
-        description={dict.hero.subtitle}
-        images={HERO_CAROUSEL_IMAGES}
-        features={dict.hero.stats.map((s) => ({ title: s.value, description: s.label }))}
-      />
     </>
   );
 }

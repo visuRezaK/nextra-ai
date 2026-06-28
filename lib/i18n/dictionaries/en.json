@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Nextra AI Consulting",
-    "description": "I bring AI into your business in minimal time — from CRM to website and chatbot — with one month of backend and content support."
+    "description": "I bring AI into your business in minimal time — from website to chatbot — with one month of backend and content support."
   },
   "brand": {
     "name": "Nextra AI Consulting",
@@ -43,7 +43,7 @@
     "headline": "AI — the answer to your business needs",
     "title": "Simple,",
     "titleAccent": "faster than you expect",
-    "subtitle": "I make AI simple for your business. I bring it into your operation in minimal time — from CRM to website and chatbot — and stay with you for one month.",
+    "subtitle": "I make AI simple for your business. I bring it into your operation in minimal time — from website to chatbot — and stay with you for one month.",
     "ctaPrimary": "Book a consultation — Free",
     "ctaSecondary": "See the consultation",
     "stats": [
@@ -51,6 +51,18 @@
       { "value": "1 month", "label": "backend & content support" },
       { "value": "24/7", "label": "A chatbot that answers your customers" }
     ]
+  },
+  "splitHero": {
+    "team": "Nextra AI Team",
+    "headingAccent": "AI consulting for your business",
+    "heading": "Specialist in implementing & developing AI automation",
+    "tagline": "Our team is the engine that drives your business growth.",
+    "points": [
+      "I bring AI into your business in minimal time — from website to chatbot.",
+      "I stay with you for one month for backend and content support."
+    ],
+    "cta": "Book a consultation",
+    "imageLabel": "Your photo goes here"
   },
   "aiQuestion": {
     "eyebrow": "AI",
@@ -108,7 +120,7 @@
       {
         "icon": "zap",
         "title": "Launch in minimal time",
-        "desc": "CRM, website and product — set up in minimal time. Not just talk, real execution."
+        "desc": "Website and product — set up in minimal time. Not just talk, real execution."
       },
       {
         "icon": "headset",
@@ -128,7 +140,7 @@
       },
       {
         "title": "Launch in minimal time",
-        "desc": "CRM, website and an AI assistant — a full system goes live in minimal time."
+        "desc": "Website and an AI assistant — a full system goes live in minimal time."
       },
       {
         "title": "1-month support",
@@ -204,7 +216,7 @@
   "about": {
     "title": "About me",
     "subtitle": "Nextra AI Consulting — AI Consultant",
-    "body": "I came from the world of computer networks and now I help businesses of all sizes — from restaurants to agencies and enterprises — sell faster and work easier with AI. From CRM to a personal assistant, website and chatbot, we launch it all in minimal time and stay with you for one month.",
+    "body": "I came from the world of computer networks and now I help businesses of all sizes — from restaurants to agencies and enterprises — sell faster and work easier with AI. From a personal assistant to website and chatbot, we launch it all in minimal time and stay with you for one month.",
     "placeholder": "Photo and full résumé coming here soon."
   },
   "audience": {
@@ -234,7 +246,7 @@
     "items": [
       {
         "q": "What services do you offer?",
-        "a": "We help businesses use AI to do everyday work faster and smarter. Services include designing and building AI chatbots, automating workflows, connecting AI to your website and CRM, and AI consulting and training for businesses. Tell me what your business is and I can suggest options tailored to your field."
+        "a": "We help businesses use AI to do everyday work faster and smarter. Services include designing and building AI chatbots, automating workflows, connecting AI to your website, and AI consulting and training for businesses. Tell me what your business is and I can suggest options tailored to your field."
       },
       {
         "q": "How can AI help my business?",
@@ -254,7 +266,7 @@
       },
       {
         "q": "Does the chatbot only answer questions?",
-        "a": "Not only that. Beyond answering, the chatbot can capture and store customer information, ask targeted questions, and prepare the user's needs for a consultation. More advanced capabilities like CRM integration or automatic booking can be built in custom projects."
+        "a": "Not only that. Beyond answering, the chatbot can capture and store customer information, ask targeted questions, and prepare the user's needs for a consultation. More advanced capabilities like automatic booking can be built in custom projects."
       },
       {
         "q": "Is my data secure?",

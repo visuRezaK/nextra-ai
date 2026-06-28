@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/icons";
-import { ButtonLink } from "@/components/ui/button";
 import { LocaleSwitcher } from "./locale-switcher";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -75,9 +74,6 @@ export function Navbar({
           >
             {isAuthed ? nav.dashboard : nav.login}
           </Link>
-          <ButtonLink href={`${base}/book`} size="md">
-            {nav.book}
-          </ButtonLink>
         </div>
 
         <button
@@ -128,9 +124,6 @@ export function Navbar({
                 {isAuthed ? nav.dashboard : nav.login}
               </Link>
             </div>
-            <ButtonLink href={`${base}/book`} size="lg" className="w-full" onClick={() => setOpen(false)}>
-              {nav.book}
-            </ButtonLink>
           </div>
         </div>
       )}
