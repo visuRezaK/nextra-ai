@@ -9,14 +9,14 @@ type Props = { dict: Dictionary; locale: Locale };
 // AI-themed imagery for the rotating hero carousel (Screen 3).
 // TODO: replace these Unsplash URLs with owned assets in /public for production.
 const HERO_CAROUSEL_IMAGES = [
-  { id: "1", src: "https://images.unsplash.com/photo-1684369176170-463e84248b70?auto=format&fit=crop&q=60&w=900", alt: "AI 1", rotation: -15 },
-  { id: "2", src: "https://plus.unsplash.com/premium_photo-1677269465314-d5d2247a0b0c?auto=format&fit=crop&q=60&w=900", alt: "AI 2", rotation: -8 },
-  { id: "3", src: "https://images.unsplash.com/photo-1524673360092-e07b7ae58845?auto=format&fit=crop&q=60&w=900", alt: "AI 3", rotation: 5 },
-  { id: "4", src: "https://plus.unsplash.com/premium_photo-1680610653084-6e4886519caf?auto=format&fit=crop&q=60&w=900", alt: "AI 4", rotation: 12 },
-  { id: "5", src: "https://plus.unsplash.com/premium_photo-1680608979589-e9349ed066d5?auto=format&fit=crop&q=60&w=900", alt: "AI 5", rotation: -12 },
-  { id: "6", src: "https://images.unsplash.com/photo-1562575214-da9fcf59b907?auto=format&fit=crop&q=60&w=900", alt: "AI 6", rotation: 8 },
-  { id: "7", src: "https://plus.unsplash.com/premium_photo-1676637656210-390da73f4951?auto=format&fit=crop&q=60&w=900", alt: "AI 7", rotation: 8 },
-  { id: "8", src: "https://images.unsplash.com/photo-1664448003794-2d446c53dcae?auto=format&fit=crop&q=60&w=900", alt: "AI 8", rotation: 8 },
+  { id: "1", src: "https://images.unsplash.com/photo-1684369176170-463e84248b70?auto=format&fit=crop&q=60&w=400", alt: "AI 1", rotation: -15 },
+  { id: "2", src: "https://plus.unsplash.com/premium_photo-1677269465314-d5d2247a0b0c?auto=format&fit=crop&q=60&w=400", alt: "AI 2", rotation: -8 },
+  { id: "3", src: "https://images.unsplash.com/photo-1524673360092-e07b7ae58845?auto=format&fit=crop&q=60&w=400", alt: "AI 3", rotation: 5 },
+  { id: "4", src: "https://plus.unsplash.com/premium_photo-1680610653084-6e4886519caf?auto=format&fit=crop&q=60&w=400", alt: "AI 4", rotation: 12 },
+  { id: "5", src: "https://plus.unsplash.com/premium_photo-1680608979589-e9349ed066d5?auto=format&fit=crop&q=60&w=400", alt: "AI 5", rotation: -12 },
+  { id: "6", src: "https://images.unsplash.com/photo-1562575214-da9fcf59b907?auto=format&fit=crop&q=60&w=400", alt: "AI 6", rotation: 8 },
+  { id: "7", src: "https://plus.unsplash.com/premium_photo-1676637656210-390da73f4951?auto=format&fit=crop&q=60&w=400", alt: "AI 7", rotation: 8 },
+  { id: "8", src: "https://images.unsplash.com/photo-1664448003794-2d446c53dcae?auto=format&fit=crop&q=60&w=400", alt: "AI 8", rotation: 8 },
 ];
 
 function SectionHeading({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {

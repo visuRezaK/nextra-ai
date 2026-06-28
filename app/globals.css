@@ -111,6 +111,21 @@ html[lang="fa"] body {
   color: var(--accent-foreground);
 }
 
+/* Hero image ring — rotate the entire ring as a single GPU-composited layer.
+   This avoids per-frame rasterization of the 8 cards, which is what caused the
+   jitter on mobile. 36s per revolution ≈ 10deg/sec (the original speed). */
+@keyframes hero-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero-ring {
+  animation: hero-ring-spin 36s linear infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   html {

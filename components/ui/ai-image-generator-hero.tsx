@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-import { useRef, useEffect } from "react";
 import { IconArrow } from "@/components/icons";
 
 // Adapted from a 21st.dev shadcn component to this project's design tokens:
@@ -33,61 +31,18 @@ export function ImageCarouselHero({
   images,
   features = [],
 }: ImageCarouselHeroProps) {
-  // Mouse perspective and orbit state live in refs so the rAF loop can read the
-  // latest values without triggering React re-renders on every frame / mouse move.
-  const mouseRef = useRef({ x: 0.5, y: 0.5 });
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const count = images.length;
-
-  // Continuous rotation animation — time-based requestAnimationFrame loop that
-  // writes transforms straight to the DOM (no per-frame setState → no jitter).
-  useEffect(() => {
-    const radius = 180;
-    const speed = 10; // degrees per second (matches the old 0.5deg / 50ms)
-    const rotations = images.map((img) => img.rotation);
-
-    const writeFrame = (baseAngle: number) => {
-      const { x: mx, y: my } = mouseRef.current;
-      const perspectiveX = (mx - 0.5) * 20;
-      const perspectiveY = (my - 0.5) * 20;
-      for (let i = 0; i < count; i++) {
-        const el = cardRefs.current[i];
-        if (!el) continue;
-        const angle = ((baseAngle + i * (360 / count)) % 360) * (Math.PI / 180);
-        const tx = Math.cos(angle) * radius;
-        const ty = Math.sin(angle) * radius;
-        el.style.transform = `translate(${tx}px, ${ty}px) rotateX(${perspectiveY}deg) rotateY(${perspectiveX}deg) rotateZ(${rotations[i]}deg)`;
-      }
+  // Static ring layout, computed once. The whole ring is rotated as a single
+  // GPU-composited layer via CSS (see `.hero-ring` in globals.css) — nothing is
+  // re-rastered per frame, which is what keeps it smooth on mobile.
+  const radius = 180;
+  const ringCards = images.map((image, index) => {
+    const angle = index * (360 / images.length) * (Math.PI / 180);
+    return {
+      ...image,
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
     };
-
-    // Respect reduced-motion: place cards once and skip the animation loop.
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
-      writeFrame(0);
-      return;
-    }
-
-    let frame = 0;
-    let start: number | null = null;
-    const tick = (now: number) => {
-      if (start === null) start = now;
-      const baseAngle = ((now - start) / 1000) * speed;
-      writeFrame(baseAngle);
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [images, count]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    mouseRef.current = {
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    };
-  };
+  });
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-background">
@@ -99,46 +54,28 @@ export function ImageCarouselHero({
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         {/* Carousel */}
-        <div
-          className="relative mb-12 h-96 w-full max-w-6xl sm:mb-16 sm:h-[500px]"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => {
-            mouseRef.current = { x: 0.5, y: 0.5 };
-          }}
-        >
-          <div className="perspective absolute inset-0 flex items-center justify-center">
-            {images.map((image, index) => {
-              // Seed the first paint at baseAngle 0 (matches the rAF loop's start)
-              // so the ring is already spread out before the animation takes over.
-              const seedAngle = index * (360 / images.length) * (Math.PI / 180);
-              const seedX = Math.cos(seedAngle) * 180;
-              const seedY = Math.sin(seedAngle) * 180;
-              return (
-                <div
-                  key={image.id}
-                  ref={(el) => {
-                    cardRefs.current[index] = el;
-                  }}
-                  className="absolute h-40 w-32 sm:h-48 sm:w-40"
-                  style={{
-                    transform: `translate(${seedX}px, ${seedY}px) rotateZ(${image.rotation}deg)`,
-                    transformStyle: "preserve-3d",
-                    willChange: "transform",
-                    backfaceVisibility: "hidden",
-                  }}
-                >
-                  <div className="group relative h-full w-full cursor-pointer overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 hover:scale-110">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  </div>
+        <div className="relative mb-12 h-96 w-full max-w-6xl sm:mb-16 sm:h-[500px]">
+          <div className="hero-ring absolute inset-0 flex items-center justify-center">
+            {ringCards.map((image) => (
+              <div
+                key={image.id}
+                className="absolute h-40 w-32 sm:h-48 sm:w-40"
+                style={{
+                  transform: `translate(${image.x}px, ${image.y}px) rotate(${image.rotation}deg)`,
+                }}
+              >
+                <div className="group relative h-full w-full overflow-hidden rounded-2xl shadow-2xl">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
 
