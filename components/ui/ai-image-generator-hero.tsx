@@ -46,8 +46,8 @@ export function ImageCarouselHero({
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-background">
-      {/* Animated background glow */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Animated background glow — desktop only; animated blur jitters on iOS Safari */}
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden md:block">
         <div className="absolute right-0 top-0 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-accent/10 to-transparent blur-3xl" />
         <div className="absolute bottom-0 left-0 h-96 w-96 animate-pulse rounded-full bg-gradient-to-tr from-accent/10 to-transparent blur-3xl" />
       </div>
@@ -103,7 +103,7 @@ export function ImageCarouselHero({
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group rounded-xl border border-border/50 bg-surface-2/50 p-6 text-center backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-surface-2/80"
+                className="group rounded-xl border border-border/50 bg-surface-2/80 p-6 text-center transition-all duration-300 hover:border-border hover:bg-surface-2 md:bg-surface-2/50 md:backdrop-blur-sm md:hover:bg-surface-2/80"
               >
                 <h3 className="mb-2 text-lg font-semibold text-foreground transition-colors group-hover:text-accent sm:text-xl">
                   {feature.title}

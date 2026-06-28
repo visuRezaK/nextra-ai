@@ -41,7 +41,7 @@ export function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/95 md:bg-background/80 md:backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5">
         <Link href={base} aria-label={brand} className="flex flex-col items-center leading-none" dir="ltr">
           <span className="flex items-center gap-0">
