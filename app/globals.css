@@ -121,9 +121,16 @@ html[lang="fa"] body {
 }
 
 .hero-ring {
-  animation: hero-ring-spin 36s linear infinite;
   transform-origin: center;
-  will-change: transform;
+}
+
+/* Animate only on desktop. On mobile the continuously rotating layer jittered
+   on real devices, so the ring stays static there (still a nice composition). */
+@media (min-width: 768px) {
+  .hero-ring {
+    animation: hero-ring-spin 36s linear infinite;
+    will-change: transform;
+  }
 }
 
 /* Respect reduced-motion preferences */
