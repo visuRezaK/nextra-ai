@@ -1,7 +1,6 @@
 import { ButtonLink } from "@/components/ui/button";
 import { IconAlert, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
 import { ImageCarouselHero } from "@/components/ui/ai-image-generator-hero";
-import { AiSolver } from "@/components/site/ai-solver";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -95,8 +94,17 @@ export function Hero({ dict }: Props) {
       {/* Screen 1 — AI question hook */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-          <AiSolver />
-          <h2 className="mt-10 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+          <div className="mx-auto mb-10 max-w-xl overflow-hidden rounded-3xl border border-border/60 shadow-[0_24px_60px_-28px_rgba(14,165,233,0.35)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/nextra-robot.webp"
+              alt="Nextra — دستیار هوش مصنوعی"
+              width={1100}
+              height={600}
+              className="h-auto w-full"
+            />
+          </div>
+          <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
             <span className="[font-family:var(--font-inter)] text-accent">{dict.aiQuestion.eyebrow}</span>
             {" "}
             {dict.aiQuestion.question}
