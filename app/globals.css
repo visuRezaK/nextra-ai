@@ -120,16 +120,18 @@ html[lang="fa"] body {
   }
 }
 
+/* Rotate the ring as a single GPU-composited layer. Mobile gets a very gentle
+   120s/revolution (the old per-card animation jittered on iOS, but a transform-
+   only spin of one composited layer stays smooth); desktop keeps the 36s speed. */
 .hero-ring {
   transform-origin: center;
+  animation: hero-ring-spin 120s linear infinite;
+  will-change: transform;
 }
 
-/* Animate only on desktop. On mobile the continuously rotating layer jittered
-   on real devices, so the ring stays static there (still a nice composition). */
 @media (min-width: 768px) {
   .hero-ring {
-    animation: hero-ring-spin 36s linear infinite;
-    will-change: transform;
+    animation-duration: 36s;
   }
 }
 
