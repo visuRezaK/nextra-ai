@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { IconArrow } from "@/components/icons";
 
 // Adapted from a 21st.dev shadcn component to this project's design tokens:
@@ -33,26 +33,60 @@ export function ImageCarouselHero({
   images,
   features = [],
 }: ImageCarouselHeroProps) {
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
-  // Seed each card evenly around the circle (lazy initializer — no setState-in-effect)
-  const [rotatingCards, setRotatingCards] = useState<number[]>(() =>
-    images.map((_, i) => i * (360 / images.length)),
-  );
+  // Mouse perspective and orbit state live in refs so the rAF loop can read the
+  // latest values without triggering React re-renders on every frame / mouse move.
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const count = images.length;
 
-  // Continuous rotation animation
+  // Continuous rotation animation — time-based requestAnimationFrame loop that
+  // writes transforms straight to the DOM (no per-frame setState → no jitter).
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRotatingCards((prev) => prev.map((v) => (v + 0.5) % 360));
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
+    const radius = 180;
+    const speed = 10; // degrees per second (matches the old 0.5deg / 50ms)
+    const rotations = images.map((img) => img.rotation);
+
+    const writeFrame = (baseAngle: number) => {
+      const { x: mx, y: my } = mouseRef.current;
+      const perspectiveX = (mx - 0.5) * 20;
+      const perspectiveY = (my - 0.5) * 20;
+      for (let i = 0; i < count; i++) {
+        const el = cardRefs.current[i];
+        if (!el) continue;
+        const angle = ((baseAngle + i * (360 / count)) % 360) * (Math.PI / 180);
+        const tx = Math.cos(angle) * radius;
+        const ty = Math.sin(angle) * radius;
+        el.style.transform = `translate(${tx}px, ${ty}px) rotateX(${perspectiveY}deg) rotateY(${perspectiveX}deg) rotateZ(${rotations[i]}deg)`;
+      }
+    };
+
+    // Respect reduced-motion: place cards once and skip the animation loop.
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      writeFrame(0);
+      return;
+    }
+
+    let frame = 0;
+    let start: number | null = null;
+    const tick = (now: number) => {
+      if (start === null) start = now;
+      const baseAngle = ((now - start) / 1000) * speed;
+      writeFrame(baseAngle);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [images, count]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setMousePosition({
+    mouseRef.current = {
       x: (e.clientX - rect.left) / rect.width,
       y: (e.clientY - rect.top) / rect.height,
-    });
+    };
   };
 
   return (
@@ -68,24 +102,29 @@ export function ImageCarouselHero({
         <div
           className="relative mb-12 h-96 w-full max-w-6xl sm:mb-16 sm:h-[500px]"
           onMouseMove={handleMouseMove}
-          onMouseLeave={() => setMousePosition({ x: 0.5, y: 0.5 })}
+          onMouseLeave={() => {
+            mouseRef.current = { x: 0.5, y: 0.5 };
+          }}
         >
           <div className="perspective absolute inset-0 flex items-center justify-center">
             {images.map((image, index) => {
-              const angle = (rotatingCards[index] || 0) * (Math.PI / 180);
-              const radius = 180;
-              const x = Math.cos(angle) * radius;
-              const y = Math.sin(angle) * radius;
-              const perspectiveX = (mousePosition.x - 0.5) * 20;
-              const perspectiveY = (mousePosition.y - 0.5) * 20;
-
+              // Seed the first paint at baseAngle 0 (matches the rAF loop's start)
+              // so the ring is already spread out before the animation takes over.
+              const seedAngle = index * (360 / images.length) * (Math.PI / 180);
+              const seedX = Math.cos(seedAngle) * 180;
+              const seedY = Math.sin(seedAngle) * 180;
               return (
                 <div
                   key={image.id}
-                  className="absolute h-40 w-32 transition-all duration-300 sm:h-48 sm:w-40"
+                  ref={(el) => {
+                    cardRefs.current[index] = el;
+                  }}
+                  className="absolute h-40 w-32 sm:h-48 sm:w-40"
                   style={{
-                    transform: `translate(${x}px, ${y}px) rotateX(${perspectiveY}deg) rotateY(${perspectiveX}deg) rotateZ(${image.rotation}deg)`,
+                    transform: `translate(${seedX}px, ${seedY}px) rotateZ(${image.rotation}deg)`,
                     transformStyle: "preserve-3d",
+                    willChange: "transform",
+                    backfaceVisibility: "hidden",
                   }}
                 >
                   <div className="group relative h-full w-full cursor-pointer overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 hover:scale-110">
