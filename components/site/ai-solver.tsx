@@ -121,13 +121,17 @@ export function AiSolver() {
           </g>
         ))}
 
-        {/* AI robot core */}
+        {/* "Nextra" AI robot core — antennae with yellow tips, glowing eyes, smile */}
         <g className="ai-core">
-          <rect x="160" y="110" width="80" height="80" rx="22" fill="url(#aiCoreGrad)" />
-          <rect x="174" y="129" width="52" height="27" rx="13" fill="#082F49" fillOpacity="0.9" />
-          <circle cx="188" cy="142" r="5" fill="#ffffff" />
-          <circle cx="212" cy="142" r="5" fill="#ffffff" />
-          <rect x="191" y="166" width="18" height="4" rx="2" fill="#bae6fd" />
+          <line x1="182" y1="116" x2="174" y2="98" stroke="#7DD3FC" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="173" cy="95" r="4.5" fill="#FACC15" />
+          <line x1="218" y1="116" x2="226" y2="98" stroke="#7DD3FC" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="227" cy="95" r="4.5" fill="#FACC15" />
+          <rect x="160" y="110" width="80" height="80" rx="26" fill="url(#aiCoreGrad)" />
+          <rect x="172" y="128" width="56" height="34" rx="16" fill="#082F49" fillOpacity="0.92" />
+          <ellipse cx="188" cy="142" rx="4.5" ry="6" fill="#67E8F9" />
+          <ellipse cx="212" cy="142" rx="4.5" ry="6" fill="#67E8F9" />
+          <path d="M 191 151 q 9 7 18 0" fill="none" stroke="#67E8F9" strokeWidth="2.5" strokeLinecap="round" />
         </g>
 
         {/* "solved" checkmarks over each port */}
