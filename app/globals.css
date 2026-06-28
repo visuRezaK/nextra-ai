@@ -135,6 +135,60 @@ html[lang="fa"] body {
   }
 }
 
+/* Screen-1 "AI solves your daily tasks" motion graphic. Transform/opacity only
+   (GPU-friendly, no animated blur) so it stays smooth on mobile. One 8s loop:
+   the AI core sends a solution to each task chip in turn, which then gets a ✓. */
+@keyframes ai-core-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+@keyframes ai-halo {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.09); }
+}
+@keyframes ai-send-up {
+  0% { transform: translateY(0); opacity: 0; }
+  4% { opacity: 1; }
+  20% { transform: translateY(-50px); opacity: 0; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+@keyframes ai-send-down {
+  0% { transform: translateY(0); opacity: 0; }
+  4% { opacity: 1; }
+  20% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(50px); opacity: 0; }
+}
+@keyframes ai-send-left {
+  0% { transform: translateX(0); opacity: 0; }
+  4% { opacity: 1; }
+  20% { transform: translateX(-40px); opacity: 0; }
+  100% { transform: translateX(-40px); opacity: 0; }
+}
+@keyframes ai-send-right {
+  0% { transform: translateX(0); opacity: 0; }
+  4% { opacity: 1; }
+  20% { transform: translateX(40px); opacity: 0; }
+  100% { transform: translateX(40px); opacity: 0; }
+}
+@keyframes ai-check {
+  0%, 16% { opacity: 0; transform: scale(0.5); }
+  22% { opacity: 1; transform: scale(1); }
+  44% { opacity: 1; transform: scale(1); }
+  50%, 100% { opacity: 0; transform: scale(1); }
+}
+.ai-core { animation: ai-core-pulse 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ai-halo { animation: ai-halo 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ai-dot { transform-box: fill-box; opacity: 0; }
+.ai-dot-up { animation: ai-send-up 8s linear infinite; }
+.ai-dot-right { animation: ai-send-right 8s linear infinite 2s; }
+.ai-dot-down { animation: ai-send-down 8s linear infinite 4s; }
+.ai-dot-left { animation: ai-send-left 8s linear infinite 6s; }
+.ai-check { transform-box: fill-box; transform-origin: center; opacity: 0; animation: ai-check 8s ease-in-out infinite; }
+.ai-check-up { animation-delay: 0s; }
+.ai-check-right { animation-delay: 2s; }
+.ai-check-down { animation-delay: 4s; }
+.ai-check-left { animation-delay: 6s; }
+
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   html {

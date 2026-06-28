@@ -1,6 +1,7 @@
 import { ButtonLink } from "@/components/ui/button";
 import { IconAlert, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
 import { ImageCarouselHero } from "@/components/ui/ai-image-generator-hero";
+import { AiSolver } from "@/components/site/ai-solver";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -94,7 +95,8 @@ export function Hero({ dict }: Props) {
       {/* Screen 1 — AI question hook */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-          <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+          <AiSolver />
+          <h2 className="mt-10 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
             <span className="[font-family:var(--font-inter)] text-accent">{dict.aiQuestion.eyebrow}</span>
             {" "}
             {dict.aiQuestion.question}
