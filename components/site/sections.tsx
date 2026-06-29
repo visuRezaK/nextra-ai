@@ -125,15 +125,15 @@ export function Hero({ dict, locale }: Props) {
                 </ButtonLink>
               </div>
             </div>
-            {/* Image column — owner photo (background removed) */}
+            {/* Image column — owner photo */}
             <div className="order-first lg:order-none">
-              <div className="relative mx-auto w-full max-w-sm">
+              <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl">
                 <Image
-                  src="/images/profile-reza-nobg.png"
+                  src="/images/profile-reza.jpeg"
                   alt="رضا کتانچی — مشاور هوش مصنوعی"
                   width={400}
                   height={500}
-                  className="w-full object-contain"
+                  className="w-full object-cover"
                   priority
                 />
               </div>
