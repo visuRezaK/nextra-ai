@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ButtonLink } from "@/components/ui/button";
-import { IconAlert, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
+import { IconAlert, IconCheck, IconCompass, IconDollarSign, IconTrendingUp, IconUsers, IconShield, IconTarget, serviceIcons, type ServiceIconName } from "@/components/icons";
 import { ImageRing } from "@/components/ui/ai-image-generator-hero";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -32,20 +32,32 @@ function SectionHeading({ eyebrow, title, subtitle }: { eyebrow?: string; title:
   );
 }
 
+const PROBLEM_ICONS = [
+  { Icon: IconCompass,    color: "border-sky-200    bg-sky-50    text-sky-600"    },
+  { Icon: IconDollarSign, color: "border-amber-200  bg-amber-50  text-amber-600"  },
+  { Icon: IconTrendingUp, color: "border-rose-200   bg-rose-50   text-rose-600"   },
+  { Icon: IconUsers,      color: "border-violet-200 bg-violet-50 text-violet-600" },
+  { Icon: IconShield,     color: "border-teal-200   bg-teal-50   text-teal-600"   },
+  { Icon: IconTarget,     color: "border-orange-200 bg-orange-50 text-orange-600" },
+];
+
 export function Problem({ dict }: Props) {
   return (
     <section className="mx-auto max-w-6xl px-5 py-20">
       <SectionHeading eyebrow={dict.problem.eyebrow} title={dict.problem.title} subtitle={dict.problem.subtitle} />
       <div className="mt-12 grid gap-5 sm:grid-cols-3">
-        {dict.problem.items.map((item) => (
-          <div key={item.title} className="card-surface flex flex-col gap-4 p-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-600">
-              <IconAlert className="h-5 w-5" />
+        {dict.problem.items.map((item, i) => {
+          const { Icon, color } = PROBLEM_ICONS[i % PROBLEM_ICONS.length];
+          return (
+            <div key={item.title} className="card-surface flex flex-col gap-4 p-6">
+              <div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${color}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="text-lg font-bold">{item.title}</h3>
+              <p className="text-sm leading-relaxed text-muted">{item.desc}</p>
             </div>
-            <h3 className="text-lg font-bold">{item.title}</h3>
-            <p className="text-sm leading-relaxed text-muted">{item.desc}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
