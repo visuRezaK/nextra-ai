@@ -161,7 +161,7 @@ export function Hero({ dict, locale }: Props) {
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
           {/* Robot image removed for now — using the rotating image ring instead */}
           <ImageRing images={HERO_CAROUSEL_IMAGES} />
-          <h2 className="mt-14 text-4xl font-black leading-tight tracking-tight sm:mt-6 sm:text-6xl">
+          <h2 className="mt-28 text-4xl font-black leading-tight tracking-tight sm:mt-6 sm:text-6xl">
             <span className="[font-family:var(--font-inter)] text-accent">{dict.aiQuestion.eyebrow}</span>
             {" "}
             {dict.aiQuestion.question}
