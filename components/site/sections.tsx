@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ButtonLink } from "@/components/ui/button";
 import { IconAlert, IconCheck, serviceIcons, type ServiceIconName } from "@/components/icons";
 import { ImageRing } from "@/components/ui/ai-image-generator-hero";
@@ -124,30 +125,36 @@ export function Hero({ dict, locale }: Props) {
                 </ButtonLink>
               </div>
             </div>
-            {/* Image column — placeholder frame until the owner's photo is added */}
+            {/* Image column — owner photo (background removed) */}
             <div className="order-first lg:order-none">
-              <div className="relative mx-auto flex aspect-[4/5] w-full max-w-sm items-center justify-center overflow-hidden rounded-3xl border border-dashed border-accent/40 bg-gradient-to-br from-accent/10 via-surface to-background">
-                <div className="flex flex-col items-center gap-3 px-6 text-center text-muted">
-                  <svg
-                    className="h-16 w-16 text-accent/50"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 19.5a7.5 7.5 0 0 1 15 0v.75H4.5v-.75Z"
-                    />
-                  </svg>
-                  <span className="text-sm font-medium">{sh.imageLabel}</span>
-                </div>
+              <div className="relative mx-auto w-full max-w-sm">
+                <Image
+                  src="/images/profile-reza-nobg.png"
+                  alt="رضا کتانچی — مشاور هوش مصنوعی"
+                  width={400}
+                  height={500}
+                  className="w-full object-contain"
+                  priority
+                />
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Curved divider between Screen 1 and Screen 2 — white band so the two screens read as separate */}
+      <div aria-hidden="true" className="relative h-16 w-full overflow-hidden bg-background text-accent/70 sm:h-24">
+        <svg className="h-full w-full" viewBox="0 0 1200 100" preserveAspectRatio="none">
+          <path
+            d="M0,50 C200,5 400,5 600,50 C800,95 1000,95 1200,50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      </div>
 
       {/* Screen 2 — AI question hook */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
