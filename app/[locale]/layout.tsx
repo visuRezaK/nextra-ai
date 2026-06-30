@@ -5,6 +5,7 @@ import "../globals.css";
 import { isLocale, locales, localeDirection, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { TelegramButton } from "@/components/ui/telegram-button";
 import { ChatWidget } from "@/components/chat/chat-widget";
 
 const inter = Inter({
@@ -76,6 +77,7 @@ export default async function LocaleLayout({
       <body className="bg-background text-foreground antialiased">
         {children}
         <ScrollToTop />
+        <TelegramButton />
         <ChatWidget locale={locale as Locale} dict={dict.chat} />
       </body>
     </html>

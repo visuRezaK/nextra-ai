@@ -30,6 +30,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip Next internals, API routes, the auth callback and files with an extension.
-  matcher: ["/((?!_next|api|auth|.*\\..*).*)"],
+  // Skip Next internals, API routes, auth callback, embed iframe page, and files with an extension.
+  matcher: ["/((?!_next|api|auth|embed|.*\\..*).*)"],
 };

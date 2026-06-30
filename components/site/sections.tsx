@@ -131,11 +131,6 @@ export function Hero({ dict, locale }: Props) {
                   </li>
                 ))}
               </ul>
-              <div className="mt-8 flex justify-center lg:justify-start">
-                <ButtonLink href={`/${locale}/book`} size="lg">
-                  {sh.cta}
-                </ButtonLink>
-              </div>
             </div>
             {/* Image column — owner photo */}
             <div className="order-first lg:order-none">
