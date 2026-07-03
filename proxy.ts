@@ -13,6 +13,13 @@ function getLocale(request: NextRequest): string {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Admin panel lives outside the locale tree (fa-only). Refresh the session
+  // but skip locale redirection.
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const response = NextResponse.next({ request });
+    return updateSession(request, response);
+  }
+
   const hasLocale = locales.some(
     (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
   );
@@ -31,5 +38,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Skip Next internals, API routes, auth callback, embed iframe page, and files with an extension.
+  // Note: /admin IS matched on purpose — its branch above refreshes the session without locale redirects.
   matcher: ["/((?!_next|api|auth|embed|.*\\..*).*)"],
 };

@@ -311,6 +311,7 @@
   },
   "dashboard": {
     "welcome": "Welcome",
+    "adminPanel": "Admin panel",
     "subtitle": "Your dashboard — your bookings and sessions live here.",
     "myBookings": "My bookings",
     "noBookings": "You don't have any bookings yet.",

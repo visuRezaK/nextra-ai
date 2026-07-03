@@ -36,7 +36,7 @@ export default async function DashboardPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email")
+    .select("full_name, email, role")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -56,12 +56,19 @@ export default async function DashboardPage({
             <Logo />
             <span className="text-lg font-extrabold tracking-tight">{dict.brand.name}</span>
           </Link>
-          <form action={signOutAction}>
-            <input type="hidden" name="locale" value={locale} />
-            <Button type="submit" variant="ghost" size="md">
-              {dict.nav.logout}
-            </Button>
-          </form>
+          <div className="flex items-center gap-2">
+            {profile?.role === "admin" && (
+              <ButtonLink href="/admin" variant="secondary" size="md">
+                {dict.dashboard.adminPanel}
+              </ButtonLink>
+            )}
+            <form action={signOutAction}>
+              <input type="hidden" name="locale" value={locale} />
+              <Button type="submit" variant="ghost" size="md">
+                {dict.nav.logout}
+              </Button>
+            </form>
+          </div>
         </header>
 
         <section className="mt-10">

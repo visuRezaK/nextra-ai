@@ -4,13 +4,15 @@ import {
   convertToModelMessages,
   type UIMessage,
 } from "ai";
-import { CHAT_MODEL } from "./models";
+import { chatModel } from "./models";
+import { getRuntimeChatConfig } from "./config";
 import { retrieve } from "./rag";
 import {
   resolveSession,
   loadHistory,
   appendMessages,
   refreshMemory,
+  type StoredMessage,
 } from "./memory";
 import { buildSystemPrompt } from "./prompts";
 import { buildTools } from "./tools";
@@ -51,21 +53,37 @@ export async function runChat(params: RunChatParams) {
   const session = await resolveSession({ channel, externalId, userId });
   const userText = lastUserText(messages);
 
+  // Runtime config from the admin panel (model + persona); fails soft to defaults.
+  const config = await getRuntimeChatConfig();
+
   const chunks = await retrieve(userText, locale, 5);
-  const system = buildSystemPrompt({ chunks, memorySummary: session.summary });
+  const system = buildSystemPrompt({
+    chunks,
+    memorySummary: session.summary,
+    persona: config.persona,
+  });
 
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
-    model: CHAT_MODEL,
+    model: chatModel(config.modelId),
+    temperature: config.temperature ?? undefined,
+    maxOutputTokens: config.maxOutputTokens ?? undefined,
     system,
     messages: modelMessages,
     tools: buildTools({ sessionId: session.id }),
     stopWhen: stepCountIs(4),
-    onFinish: async ({ text }) => {
-      const toStore: { role: "user" | "assistant"; content: string }[] = [];
+    onFinish: async ({ text, totalUsage }) => {
+      const toStore: StoredMessage[] = [];
       if (userText) toStore.push({ role: "user", content: userText });
-      if (text?.trim()) toStore.push({ role: "assistant", content: text.trim() });
+      if (text?.trim())
+        toStore.push({
+          role: "assistant",
+          content: text.trim(),
+          model: config.modelId,
+          tokensIn: totalUsage?.inputTokens,
+          tokensOut: totalUsage?.outputTokens,
+        });
       await appendMessages(session.id, toStore);
 
       const history = await loadHistory(session.id, 12);

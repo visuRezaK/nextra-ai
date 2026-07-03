@@ -7,6 +7,21 @@ import { google } from "@ai-sdk/google";
 // Main conversational model — Gemini 2.5 Flash (great Persian, fast, tool calling).
 export const CHAT_MODEL = google("gemini-2.5-flash");
 
+// Chat models the admin panel may select between (all Gemini — same key).
+export const ALLOWED_CHAT_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-pro",
+] as const;
+export type AllowedChatModel = (typeof ALLOWED_CHAT_MODELS)[number];
+
+// Resolve a configured model id to a provider instance, falling back to the
+// default flash model when the id is unknown (e.g. stale DB value).
+export function chatModel(id: string) {
+  const valid = (ALLOWED_CHAT_MODELS as readonly string[]).includes(id);
+  return google(valid ? id : "gemini-2.5-flash");
+}
+
 // Cheaper model used only to maintain the rolling long-term memory summary.
 export const SUMMARY_MODEL = google("gemini-2.5-flash-lite");
 

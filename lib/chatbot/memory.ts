@@ -6,6 +6,10 @@ import type { ChatChannel } from "./types";
 export interface StoredMessage {
   role: "user" | "assistant";
   content: string;
+  // Usage metadata, recorded on assistant messages for the admin dashboard.
+  model?: string;
+  tokensIn?: number;
+  tokensOut?: number;
 }
 
 export interface ResolvedSession {
@@ -86,9 +90,29 @@ export async function appendMessages(
     session_id: sessionId,
     role: m.role,
     content: m.content,
+    // Only include usage columns when present so inserts keep working on a DB
+    // where supabase/admin.sql hasn't been applied yet.
+    ...(m.model !== undefined ? { model: m.model } : {}),
+    ...(m.tokensIn !== undefined ? { tokens_in: m.tokensIn } : {}),
+    ...(m.tokensOut !== undefined ? { tokens_out: m.tokensOut } : {}),
   }));
   const { error } = await supabase.from("chat_messages").insert(rows);
-  if (error) console.error("appendMessages error:", error);
+  if (error) {
+    // Unknown-column error — supabase/admin.sql not applied yet. PostgREST
+    // reports it as PGRST204 (schema cache) or 42703 (PostgreSQL). Retry
+    // without the usage columns so messages are never lost.
+    if (error.code === "PGRST204" || error.code === "42703") {
+      const bare = messages.map((m) => ({
+        session_id: sessionId,
+        role: m.role,
+        content: m.content,
+      }));
+      const { error: retryError } = await supabase.from("chat_messages").insert(bare);
+      if (retryError) console.error("appendMessages retry error:", retryError);
+      return;
+    }
+    console.error("appendMessages error:", error);
+  }
 }
 
 // Update the long-term summary from recent turns. Cheap model, best-effort:
