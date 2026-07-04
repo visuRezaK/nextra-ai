@@ -78,6 +78,51 @@ export async function googleAction(formData: FormData): Promise<void> {
   redirect(data.url);
 }
 
+export async function forgotPasswordAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const locale = safeLocale(formData.get("locale"));
+  const email = String(formData.get("email") ?? "").trim();
+
+  if (!email) return { error: "missing" };
+
+  const supabase = await createClient();
+  const origin = await getOrigin();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/${locale}/reset-password`,
+  });
+
+  // Log but don't surface errors — never reveal whether the email exists.
+  if (error) console.error("forgotPasswordAction error:", error.message);
+  return { confirm: true };
+}
+
+export async function resetPasswordAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const locale = safeLocale(formData.get("locale"));
+  const password = String(formData.get("password") ?? "");
+
+  if (password.length < 6) return { error: "missing" };
+
+  const supabase = await createClient();
+
+  // The recovery link went through /auth/callback, which exchanged the code
+  // for a session. No session here means the link was expired or reused.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "expired" };
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+
+  redirect(`/${locale}/dashboard`);
+}
+
 export async function signOutAction(formData: FormData): Promise<void> {
   const locale = safeLocale(formData.get("locale"));
   const supabase = await createClient();

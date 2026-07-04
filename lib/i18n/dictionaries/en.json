@@ -307,7 +307,19 @@
     "or": "or",
     "haveAccount": "Have an account? Log in",
     "noAccount": "No account? Sign up",
-    "checkEmail": "A confirmation email was sent. Check your inbox and click the link."
+    "checkEmail": "A confirmation email was sent. Check your inbox and click the link.",
+    "forgot": "Forgot your password?",
+    "forgotTitle": "Reset your password",
+    "forgotDesc": "Enter your account email and we'll send you a reset link.",
+    "forgotCta": "Send reset link",
+    "resetSent": "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
+    "resetTitle": "Set a new password",
+    "newPassword": "New password",
+    "resetCta": "Save new password",
+    "resetExpired": "This reset link is expired or invalid. Please request a new one.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "backToLogin": "Back to login"
   },
   "dashboard": {
     "welcome": "Welcome",
