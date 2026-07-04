@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { PageTitle, Badge, fa, faDate } from "@/components/admin/ui";
+import { OperatorReply } from "./operator-reply";
+import { resolveHandoffAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +23,31 @@ export default async function ConversationDetailPage({
   const { id } = await params;
   const supabase = getAdminClient();
 
-  const { data: session } = await supabase
+  // Handoff columns exist only after admin3.sql; fall back so the page never breaks.
+  let handoff: { requested: string | null; resolved: string | null } = {
+    requested: null,
+    resolved: null,
+  };
+  let { data: session } = await supabase
     .from("chat_sessions")
-    .select("id, channel, external_id, created_at, last_seen")
+    .select("id, channel, external_id, created_at, last_seen, handoff_requested_at, handoff_resolved_at")
     .eq("id", id)
     .maybeSingle();
+  if (session) {
+    handoff = {
+      requested: session.handoff_requested_at ?? null,
+      resolved: session.handoff_resolved_at ?? null,
+    };
+  } else {
+    ({ data: session } = await supabase
+      .from("chat_sessions")
+      .select("id, channel, external_id, created_at, last_seen")
+      .eq("id", id)
+      .maybeSingle());
+  }
 
   if (!session) notFound();
+  const handoffOpen = Boolean(handoff.requested) && !handoff.resolved;
 
   const [messagesRes, memoryRes, leadsRes] = await Promise.all([
     supabase
@@ -59,6 +79,31 @@ export default async function ConversationDetailPage({
       <Link href="/admin/conversations" className="mb-4 inline-block text-sm text-accent hover:underline">
         ← بازگشت به فهرست گفتگوها
       </Link>
+
+      {handoffOpen ? (
+        <div className="card-surface mb-6 border-amber-400/40 bg-amber-500/5 p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-semibold">
+            🙋 در انتظار اپراتور انسانی
+            <span className="text-xs font-normal text-muted">
+              درخواست: {faDate(handoff.requested!)}
+            </span>
+          </h2>
+          <p className="mb-4 text-sm text-muted">
+            {session.channel === "telegram"
+              ? "می‌توانید از همین‌جا مستقیم در تلگرام کاربر پاسخ بدهید."
+              : "این گفتگو از وب است و ارسال مستقیم ندارد — از اطلاعات تماس لید (در همین صفحه) پیگیری کنید."}
+          </p>
+          <form action={resolveHandoffAction}>
+            <input type="hidden" name="session_id" value={session.id} />
+            <button
+              type="submit"
+              className="rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:border-accent/60"
+            >
+              ✓ رسیدگی شد (بستن درخواست)
+            </button>
+          </form>
+        </div>
+      ) : null}
 
       {leads.length > 0 ? (
         <div className="card-surface mb-6 border-accent/30 p-5">
@@ -101,10 +146,12 @@ export default async function ConversationDetailPage({
           >
             <p className="whitespace-pre-wrap">{m.content}</p>
             <p className="mt-1.5 flex items-center gap-2 text-xs text-muted">
-              <span>{m.role === "user" ? "کاربر" : "دستیار"}</span>
+              <span>
+                {m.role === "user" ? "کاربر" : m.model === "operator" ? "👤 اپراتور" : "دستیار"}
+              </span>
               <span>·</span>
               <span>{faDate(m.created_at)}</span>
-              {m.model ? (
+              {m.model && m.model !== "operator" ? (
                 <>
                   <span>·</span>
                   <span dir="ltr">{m.model}</span>
@@ -119,6 +166,13 @@ export default async function ConversationDetailPage({
           </div>
         ))}
       </div>
+
+      {session.channel === "telegram" ? (
+        <div className="card-surface mt-6 p-5">
+          <h2 className="mb-3 font-semibold">پاسخ اپراتور</h2>
+          <OperatorReply sessionId={session.id} />
+        </div>
+      ) : null}
     </>
   );
 }

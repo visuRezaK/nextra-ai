@@ -71,7 +71,7 @@ export async function runChat(params: RunChatParams) {
     maxOutputTokens: config.maxOutputTokens ?? undefined,
     system,
     messages: modelMessages,
-    tools: buildTools({ sessionId: session.id }),
+    tools: buildTools({ sessionId: session.id, channel }),
     stopWhen: stepCountIs(4),
     onFinish: async ({ text, totalUsage }) => {
       const toStore: StoredMessage[] = [];

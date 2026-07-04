@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/admin/auth";
 import { logAudit } from "@/lib/admin/audit";
 import { retrieve, type RetrievedChunk } from "@/lib/chatbot/rag";
 import { ingestAll } from "@/lib/chatbot/ingest";
+import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { revalidatePath } from "next/cache";
 
 export type TestSearchState =
@@ -53,4 +54,32 @@ export async function reingestAction(): Promise<ReingestState> {
     console.error("reingestAction error:", err);
     return { ok: false, error: "بازسازی پایگاه دانش ناموفق بود." };
   }
+}
+
+// Remove every chunk of one uploaded document (per locale).
+export async function deleteUploadAction(formData: FormData): Promise<void> {
+  const { user } = await requireRole(["editor"]);
+
+  const sourceName = String(formData.get("source_name") ?? "");
+  const locale = String(formData.get("locale") ?? "");
+  if (!sourceName) return;
+
+  const supabase = getAdminClient();
+  let query = supabase
+    .from("kb_documents")
+    .delete()
+    .eq("source", "upload")
+    .eq("metadata->>source_name", sourceName);
+  if (locale === "fa" || locale === "en") query = query.eq("locale", locale);
+
+  const { error } = await query;
+  if (error) console.error("deleteUploadAction error:", error);
+
+  await logAudit({
+    actor: user,
+    action: "kb.delete_upload",
+    target: sourceName,
+    meta: { locale: locale || null },
+  });
+  revalidatePath("/admin/knowledge");
 }

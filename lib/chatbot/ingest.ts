@@ -82,7 +82,17 @@ export async function ingestAll(): Promise<{ locale: string; count: number }[]> 
       providerOptions: embeddingOptions("RETRIEVAL_DOCUMENT"),
     });
 
-    await supabase.from("kb_documents").delete().eq("locale", locale);
+    // Only wipe dictionary-derived rows; uploaded documents (source='upload')
+    // must survive a re-ingest. Falls back to the old full wipe when the
+    // source column doesn't exist yet (admin3.sql not applied).
+    const { error: deleteError } = await supabase
+      .from("kb_documents")
+      .delete()
+      .eq("locale", locale)
+      .eq("source", "site");
+    if (deleteError) {
+      await supabase.from("kb_documents").delete().eq("locale", locale);
+    }
 
     const rows = chunks.map((c, i) => ({
       locale,
@@ -91,6 +101,7 @@ export async function ingestAll(): Promise<{ locale: string; count: number }[]> 
       content: c.content,
       embedding: embeddings[i],
       metadata: {},
+      ...(deleteError ? {} : { source: "site" }),
     }));
 
     const { error } = await supabase.from("kb_documents").insert(rows);

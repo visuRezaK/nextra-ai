@@ -16,6 +16,51 @@ export interface LeadNotification {
   source: string; // 'chatbot' | 'web'
 }
 
+// Best-effort owner alert when a chat user asks for a human operator.
+export async function notifyHandoff(params: {
+  channel: string;
+  sessionId: string;
+  reason?: string | null;
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.LEAD_NOTIFY_EMAIL;
+  if (!apiKey || !to) return;
+
+  const from = process.env.LEAD_NOTIFY_FROM ?? "Nextra AI Consulting <onboarding@resend.dev>";
+  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
+  const channelLabel =
+    params.channel === "telegram" ? "تلگرام" : params.channel === "widget" ? "ویجت" : "وب";
+
+  const body = [
+    `کاربری در گفتگوی ${channelLabel} درخواست صحبت با اپراتور انسانی دارد.`,
+    params.reason ? `موضوع: ${params.reason}` : null,
+    site ? `مشاهده گفتگو: ${site}/admin/conversations/${params.sessionId}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: `🙋 درخواست اپراتور انسانی (${channelLabel})`,
+        text: body,
+      }),
+    });
+    if (!res.ok) {
+      console.error("notifyHandoff: Resend error", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("notifyHandoff failed:", err);
+  }
+}
+
 export async function notifyLead(lead: LeadNotification): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.LEAD_NOTIFY_EMAIL;

@@ -11,27 +11,49 @@ const CHANNEL_LABELS: Record<string, string> = {
   telegram: "تلگرام",
 };
 
+interface SessionRow {
+  id: string;
+  channel: string;
+  external_id: string;
+  created_at: string;
+  last_seen: string;
+  handoff_requested_at?: string | null;
+  handoff_resolved_at?: string | null;
+  chat_messages: { count: number }[] | null;
+}
+
 export default async function ConversationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ channel?: string }>;
+  searchParams: Promise<{ channel?: string; handoff?: string }>;
 }) {
   await requireRole(["operator", "viewer"]);
-  const { channel } = await searchParams;
+  const { channel, handoff } = await searchParams;
   const supabase = getAdminClient();
 
-  let query = supabase
-    .from("chat_sessions")
-    .select("id, channel, external_id, created_at, last_seen, chat_messages(count)")
-    .order("last_seen", { ascending: false })
-    .limit(100);
+  const buildQuery = (withHandoff: boolean) => {
+    let q = supabase
+      .from("chat_sessions")
+      .select(
+        withHandoff
+          ? "id, channel, external_id, created_at, last_seen, handoff_requested_at, handoff_resolved_at, chat_messages(count)"
+          : "id, channel, external_id, created_at, last_seen, chat_messages(count)",
+      )
+      .order("last_seen", { ascending: false })
+      .limit(100);
+    if (channel === "web" || channel === "widget" || channel === "telegram") {
+      q = q.eq("channel", channel);
+    }
+    if (withHandoff && handoff === "1") {
+      q = q.not("handoff_requested_at", "is", null).is("handoff_resolved_at", null);
+    }
+    return q;
+  };
 
-  if (channel === "web" || channel === "widget" || channel === "telegram") {
-    query = query.eq("channel", channel);
-  }
-
-  const { data } = await query;
-  const rows = data ?? [];
+  // Fall back to the pre-admin3.sql column set so the page never breaks.
+  let { data } = await buildQuery(true);
+  if (!data) ({ data } = await buildQuery(false));
+  const rows = (data ?? []) as unknown as SessionRow[];
 
   return (
     <>
@@ -48,6 +70,10 @@ export default async function ConversationsPage({
           <option value="widget">ویجت</option>
           <option value="telegram">تلگرام</option>
         </select>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="handoff" value="1" defaultChecked={handoff === "1"} />
+          فقط در انتظار اپراتور 🙋
+        </label>
         <button
           type="submit"
           className="rounded-lg bg-accent px-4 py-2 text-sm text-white transition-colors hover:bg-accent-hover"
@@ -61,14 +87,17 @@ export default async function ConversationsPage({
         empty={rows.length === 0}
       >
         {rows.map((s) => {
-          const messageCount =
-            (s.chat_messages as unknown as { count: number }[] | null)?.[0]?.count ?? 0;
+          const messageCount = s.chat_messages?.[0]?.count ?? 0;
+          const waiting = Boolean(s.handoff_requested_at) && !s.handoff_resolved_at;
           return (
             <tr key={s.id}>
               <td className="px-4 py-3">
-                <Badge tone={s.channel === "telegram" ? "success" : "accent"}>
-                  {CHANNEL_LABELS[s.channel] ?? s.channel}
-                </Badge>
+                <span className="flex items-center gap-1.5">
+                  <Badge tone={s.channel === "telegram" ? "success" : "accent"}>
+                    {CHANNEL_LABELS[s.channel] ?? s.channel}
+                  </Badge>
+                  {waiting ? <Badge tone="accent">🙋 اپراتور</Badge> : null}
+                </span>
               </td>
               <td className="max-w-40 truncate px-4 py-3 text-muted" dir="ltr">
                 {s.external_id}
