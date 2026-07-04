@@ -324,6 +324,7 @@
   "dashboard": {
     "welcome": "Welcome",
     "adminPanel": "Admin panel",
+    "changePassword": "Change password",
     "subtitle": "Your dashboard — your bookings and sessions live here.",
     "myBookings": "My bookings",
     "noBookings": "You don't have any bookings yet.",

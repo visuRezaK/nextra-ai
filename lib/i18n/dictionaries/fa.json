@@ -324,6 +324,7 @@
   "dashboard": {
     "welcome": "خوش آمدید",
     "adminPanel": "پنل مدیریت",
+    "changePassword": "تغییر رمز عبور",
     "subtitle": "پنل کاربری شما — رزروها و جلسه‌هایتان اینجاست.",
     "myBookings": "رزروهای من",
     "noBookings": "هنوز رزروی ندارید.",

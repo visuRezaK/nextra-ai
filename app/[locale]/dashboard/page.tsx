@@ -62,6 +62,9 @@ export default async function DashboardPage({
                 {dict.dashboard.adminPanel}
               </ButtonLink>
             )}
+            <ButtonLink href={`/${locale}/reset-password`} variant="ghost" size="md">
+              {dict.dashboard.changePassword}
+            </ButtonLink>
             <form action={signOutAction}>
               <input type="hidden" name="locale" value={locale} />
               <Button type="submit" variant="ghost" size="md">
