@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { PageTitle, AdminTable, Badge, faDate } from "@/components/admin/ui";
 
@@ -15,7 +15,7 @@ export default async function LeadsPage({
 }: {
   searchParams: Promise<{ source?: string; q?: string }>;
 }) {
-  await requireAdmin();
+  await requireRole(["operator", "viewer"]);
   const { source, q } = await searchParams;
   const supabase = getAdminClient();
 

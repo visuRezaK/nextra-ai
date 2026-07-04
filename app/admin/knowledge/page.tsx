@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { PageTitle, StatCard, fa } from "@/components/admin/ui";
 import { TestSearch } from "./test-search";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export default async function KnowledgePage() {
-  await requireAdmin();
+  await requireRole(["editor"]);
   const supabase = getAdminClient();
 
   const { data } = await supabase

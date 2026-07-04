@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireStaff } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { PageTitle, StatCard, Badge, fa, faDate } from "@/components/admin/ui";
 
@@ -12,7 +12,7 @@ const CHANNEL_LABELS: Record<string, string> = {
 };
 
 export default async function AdminDashboardPage() {
-  await requireAdmin();
+  await requireStaff();
   const supabase = getAdminClient();
 
   const count = (table: string) =>

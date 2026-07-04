@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { DEFAULT_PERSONA } from "@/lib/chatbot/prompts";
 import { PageTitle, Badge, faDate } from "@/components/admin/ui";
@@ -8,7 +8,7 @@ import { activateVersionAction } from "./actions";
 export const dynamic = "force-dynamic";
 
 export default async function PersonaPage() {
-  await requireAdmin();
+  await requireRole(["editor"]);
   const supabase = getAdminClient();
 
   const { data: versions } = await supabase

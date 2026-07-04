@@ -1,6 +1,7 @@
 "use server";
 
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
+import { logAudit } from "@/lib/admin/audit";
 import { retrieve, type RetrievedChunk } from "@/lib/chatbot/rag";
 import { ingestAll } from "@/lib/chatbot/ingest";
 import { revalidatePath } from "next/cache";
@@ -14,7 +15,7 @@ export async function testSearchAction(
   _prev: TestSearchState,
   formData: FormData,
 ): Promise<TestSearchState> {
-  await requireAdmin();
+  await requireRole(["editor"]);
 
   const query = String(formData.get("query") ?? "").trim();
   const locale = String(formData.get("locale") ?? "fa");
@@ -37,10 +38,15 @@ export type ReingestState =
 
 // No params needed — useActionState's (state, payload) args are ignorable.
 export async function reingestAction(): Promise<ReingestState> {
-  await requireAdmin();
+  const { user } = await requireRole(["editor"]);
 
   try {
     const summary = await ingestAll();
+    await logAudit({
+      actor: user,
+      action: "kb.reingest",
+      meta: { summary },
+    });
     revalidatePath("/admin/knowledge");
     return { ok: true, summary };
   } catch (err) {

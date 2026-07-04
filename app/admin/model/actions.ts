@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
+import { logAudit } from "@/lib/admin/audit";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { invalidateChatConfigCache } from "@/lib/chatbot/config";
 import { ALLOWED_CHAT_MODELS } from "@/lib/chatbot/models";
@@ -26,7 +27,7 @@ export async function saveModelConfigAction(
   _prev: ModelConfigState,
   formData: FormData,
 ): Promise<ModelConfigState> {
-  await requireAdmin();
+  const { user } = await requireRole([]);
 
   const parsed = schema.safeParse({
     chat_model: formData.get("chat_model"),
@@ -48,6 +49,7 @@ export async function saveModelConfigAction(
     return { ok: false, error: "ذخیره ناموفق بود. آیا supabase/admin.sql اجرا شده است؟" };
   }
 
+  await logAudit({ actor: user, action: "model.save", meta: parsed.data });
   invalidateChatConfigCache();
   revalidatePath("/admin/model");
   return { ok: true };

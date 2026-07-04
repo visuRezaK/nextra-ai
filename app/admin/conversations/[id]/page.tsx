@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { PageTitle, Badge, fa, faDate } from "@/components/admin/ui";
 
@@ -17,7 +17,7 @@ export default async function ConversationDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
+  await requireRole(["operator", "viewer"]);
   const { id } = await params;
   const supabase = getAdminClient();
 

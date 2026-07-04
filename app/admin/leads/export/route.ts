@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminUser } from "@/lib/admin/auth";
+import { getStaffUser } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 
 // CSV export of the leads table, honoring the same filters as the list page.
@@ -14,8 +14,8 @@ function sanitizeQuery(q: string): string {
 }
 
 export async function GET(request: NextRequest) {
-  const user = await getAdminUser();
-  if (!user) {
+  const staff = await getStaffUser();
+  if (!staff || !["admin", "operator", "viewer"].includes(staff.role)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

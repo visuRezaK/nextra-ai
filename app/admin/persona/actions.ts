@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireRole } from "@/lib/admin/auth";
+import { logAudit } from "@/lib/admin/audit";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { invalidateChatConfigCache } from "@/lib/chatbot/config";
 
@@ -14,7 +15,7 @@ export async function savePersonaAction(
   _prev: PersonaState,
   formData: FormData,
 ): Promise<PersonaState> {
-  const user = await requireAdmin();
+  const { user } = await requireRole(["editor"]);
 
   const content = String(formData.get("content") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
@@ -44,13 +45,18 @@ export async function savePersonaAction(
     return { ok: false, error: "ذخیرهٔ نسخهٔ جدید ناموفق بود. دوباره تلاش کنید." };
   }
 
+  await logAudit({
+    actor: user,
+    action: "persona.save",
+    meta: { note: note || null, length: content.length },
+  });
   invalidateChatConfigCache();
   revalidatePath("/admin/persona");
   return { ok: true };
 }
 
 export async function activateVersionAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const { user } = await requireRole(["editor"]);
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;
@@ -72,6 +78,7 @@ export async function activateVersionAction(formData: FormData): Promise<void> {
     .eq("id", id);
   if (activateError) console.error("activateVersionAction activate error:", activateError);
 
+  await logAudit({ actor: user, action: "persona.rollback", target: id });
   invalidateChatConfigCache();
   revalidatePath("/admin/persona");
 }

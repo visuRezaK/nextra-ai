@@ -77,14 +77,27 @@ export function ChatPanel({
           </div>
         )}
 
-        {messages.map((message) => (
+        {messages.map((message, mi) => (
           <div key={message.id} className="space-y-2">
             {message.parts.map((part, i) => {
               if (part.type === "text") {
+                const isLastAssistantText =
+                  message.role === "assistant" &&
+                  i === message.parts.length - 1 &&
+                  part.text.trim().length > 0;
                 return (
-                  <Bubble key={`${message.id}-${i}`} role={message.role}>
-                    {part.text}
-                  </Bubble>
+                  <div key={`${message.id}-${i}`}>
+                    <Bubble role={message.role}>{part.text}</Bubble>
+                    {/* 👍/👎 under the finished assistant answer */}
+                    {isLastAssistantText && !(busy && mi === messages.length - 1) && (
+                      <FeedbackRow
+                        messageId={message.id}
+                        answer={part.text}
+                        question={lastUserTextBefore(messages, mi)}
+                        locale={locale}
+                      />
+                    )}
+                  </div>
                 );
               }
               // Lead-capture tool result -> small confirmation badge.
@@ -155,6 +168,71 @@ export function ChatPanel({
           {dict.send}
         </Button>
       </form>
+    </div>
+  );
+}
+
+type PanelMessage = { role: string; parts: { type: string; text?: string }[] };
+
+// The user question that preceded the assistant message at `index`.
+function lastUserTextBefore(messages: PanelMessage[], index: number): string {
+  for (let i = index - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== "user") continue;
+    return m.parts
+      .filter((p) => p.type === "text")
+      .map((p) => p.text ?? "")
+      .join(" ")
+      .trim();
+  }
+  return "";
+}
+
+// Thumbs up/down for an assistant answer. Fire-and-forget POST; the vote is
+// locked in locally so a flaky network never blocks the conversation.
+function FeedbackRow({
+  messageId,
+  question,
+  answer,
+  locale,
+}: {
+  messageId: string;
+  question: string;
+  answer: string;
+  locale: Locale;
+}) {
+  const [vote, setVote] = useState<1 | -1 | null>(null);
+
+  function send(rating: 1 | -1) {
+    if (vote) return;
+    setVote(rating);
+    fetch("/api/chat/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating, question, answer, locale }),
+    }).catch(() => {});
+  }
+
+  return (
+    <div key={messageId} className="mt-1 flex gap-1">
+      {([1, -1] as const).map((r) => (
+        <button
+          key={r}
+          type="button"
+          onClick={() => send(r)}
+          disabled={vote !== null}
+          aria-label={r === 1 ? "پاسخ مفید بود" : "پاسخ مفید نبود"}
+          className={`rounded-full px-2 py-1 text-xs transition-colors ${
+            vote === r
+              ? "bg-accent/15 text-accent"
+              : vote
+                ? "text-muted/40"
+                : "text-muted hover:bg-foreground/5 hover:text-foreground"
+          }`}
+        >
+          {r === 1 ? "👍" : "👎"}
+        </button>
+      ))}
     </div>
   );
 }

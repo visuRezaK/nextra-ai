@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { Logo } from "@/components/icons";
 import { signOutAction } from "@/app/[locale]/auth-actions";
+import type { StaffRole } from "@/lib/admin/auth";
 import { AdminNav } from "./admin-nav";
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  role,
+  children,
+}: {
+  role: StaffRole;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-dvh">
       {/* Sidebar — dir=rtl puts it on the right automatically. */}
@@ -13,7 +20,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <span className="text-sm font-semibold tracking-tight">Nextra AI</span>
         </Link>
 
-        <AdminNav />
+        <AdminNav role={role} />
 
         <div className="mt-auto flex flex-col gap-2 pt-8">
           <Link
