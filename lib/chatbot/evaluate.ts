@@ -13,17 +13,26 @@ import type { Locale } from "@/lib/i18n/config";
 // (retrieve -> system prompt -> generate), then an LLM judge scores the answer
 // on the methodology's criteria: faithfulness (anti-hallucination), relevance,
 // brand tone, and retrieval quality. Sessions/memory/tools are not touched.
+//
+// The runner is RESUMABLE and TIME-BOUNDED so it survives the free Gemini tier's
+// rate limits and Vercel's function timeout: it processes only questions that
+// don't yet have a successful result for the run, stops cleanly before the
+// time budget, and is re-invoked (background) until every question is scored.
 
 const JUDGE_MODEL_ID = "gemini-2.5-flash";
-// Sequential runs take ~10s/question; cap so a run finishes within the 300s
-// function limit. Larger golden sets can be run in a couple of passes.
+// A golden set larger than this is scored across several runs.
 const MAX_QUESTIONS_PER_RUN = 25;
 // Sequential: the free Gemini tier rate-limits bursts, and each question makes
 // 3 calls (embed + answer + judge). One at a time, with retries, is reliable.
-const CONCURRENCY = 1;
 const GAP_MS = 1500; // pause between questions to stay under the RPM ceiling
+// Stop a pass before Vercel's 300s function limit so we always persist state and
+// mark progress instead of getting killed mid-flight. Remaining questions are
+// picked up by the next (continue) pass.
+const TIME_BUDGET_MS = 230_000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+const isRateLimit = (msg: string) => /429|rate|quota|resource_exhausted/i.test(msg);
 
 // Retry transient failures (429 rate limits / 503) with exponential backoff.
 async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
@@ -35,7 +44,7 @@ async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
     } catch (err) {
       lastErr = err;
       const msg = err instanceof Error ? err.message : String(err);
-      const retriable = /429|rate|quota|503|overloaded|timeout/i.test(msg);
+      const retriable = isRateLimit(msg) || /503|overloaded|timeout/i.test(msg);
       if (!retriable || attempt === delays.length) break;
       console.warn(`[eval] ${label} retry ${attempt + 1} after: ${msg.slice(0, 80)}`);
       await sleep(delays[attempt]);
@@ -113,155 +122,227 @@ ${answer}
   return object;
 }
 
-export interface EvalRunSummary {
-  runId: string;
-  questionCount: number;
-  totals: {
-    health: number;
-    faithfulness: number;
-    relevance: number;
-    tone: number;
-    retrieval: number;
-    pass: number;
-    warn: number;
-    fail: number;
-  };
+export interface EvalTotals {
+  health: number;
+  faithfulness: number;
+  relevance: number;
+  tone: number;
+  retrieval: number;
+  pass: number;
+  warn: number;
+  fail: number;
 }
 
-// Execute the full golden set and persist a run + per-question results.
-export async function runEvaluation(): Promise<EvalRunSummary> {
-  const supabase = getAdminClient();
-  const config = await getRuntimeChatConfig();
+// One background pass over the golden set. Returns live progress so the caller
+// (or client poller) knows whether to schedule another pass.
+export interface EvalRunProgress {
+  runId: string;
+  complete: boolean;
+  done: number; // questions with a persisted result
+  total: number; // active questions in the run
+}
 
-  const { data: questions, error: qError } = await supabase
+// Load the active golden set (same query used to size a run).
+async function loadActiveQuestions() {
+  const supabase = getAdminClient();
+  const { data, error } = await supabase
     .from("eval_questions")
     .select("id, question, category, expected, locale")
     .eq("is_active", true)
     .order("created_at", { ascending: true })
     .limit(MAX_QUESTIONS_PER_RUN);
+  if (error) throw new Error(`eval questions load failed: ${error.message}`);
+  return (data ?? []) as EvalQuestion[];
+}
 
-  if (qError) throw new Error(`eval questions load failed: ${qError.message}`);
-  const list = (questions ?? []) as EvalQuestion[];
-  if (list.length === 0) throw new Error("no active questions");
+// Question ids that already have a persisted result for this run.
+async function loadDoneIds(runId: string): Promise<Set<string>> {
+  const supabase = getAdminClient();
+  const { data } = await supabase
+    .from("eval_results")
+    .select("question_id")
+    .eq("run_id", runId);
+  return new Set((data ?? []).map((r) => r.question_id as string).filter(Boolean));
+}
 
-  const { data: run, error: runError } = await supabase
-    .from("eval_runs")
-    .insert({
-      status: "running",
-      model: config.modelId,
-      judge_model: JUDGE_MODEL_ID,
-      question_count: list.length,
-    })
-    .select("id")
-    .single();
-  if (runError || !run) throw new Error(`eval run insert failed: ${runError?.message}`);
-  const runId = run.id as string;
+function computeTotals(
+  rows: { scores: Record<string, number> | null; verdict: string | null }[],
+): EvalTotals {
+  const n = Math.max(1, rows.length);
+  const avg = (key: keyof JudgeScores) =>
+    Math.round((rows.reduce((s, r) => s + (Number(r.scores?.[key]) || 0), 0) / n) * 10);
 
-  const results: {
-    scores: JudgeScores;
-  }[] = [];
-
-  // Small worker pool — keeps within free-tier rate limits.
-  let cursor = 0;
-  async function worker() {
-    while (cursor < list.length) {
-      const q = list[cursor++];
-      try {
-        const chunks = await withRetry(() => retrieve(q.question, q.locale, 5), "retrieve");
-        const system = buildSystemPrompt({
-          chunks,
-          memorySummary: null,
-          persona: config.persona,
-        });
-        const { text: answer } = await withRetry(
-          () =>
-            generateText({
-              model: chatModel(config.modelId),
-              temperature: config.temperature ?? undefined,
-              maxOutputTokens: config.maxOutputTokens ?? undefined,
-              system,
-              prompt: q.question,
-            }),
-          "answer",
-        );
-
-        const scores = await withRetry(() => judgeAnswer({ question: q, answer, chunks }), "judge");
-        results.push({ scores });
-
-        await supabase.from("eval_results").insert({
-          run_id: runId,
-          question_id: q.id,
-          question: q.question,
-          category: q.category,
-          answer,
-          retrieved: chunks.map((c) => ({
-            title: c.title,
-            similarity: Math.round(c.similarity * 100) / 100,
-          })),
-          scores: {
-            faithfulness: scores.faithfulness,
-            relevance: scores.relevance,
-            tone: scores.tone,
-            retrieval: scores.retrieval,
-          },
-          verdict: scores.verdict,
-          judge_note: scores.note,
-        });
-      } catch (err) {
-        console.error(`eval question failed (${q.id}):`, err);
-        const msg = err instanceof Error ? err.message : String(err);
-        const rateLimited = /429|rate|quota/i.test(msg);
-        await supabase.from("eval_results").insert({
-          run_id: runId,
-          question_id: q.id,
-          question: q.question,
-          category: q.category,
-          verdict: "fail",
-          judge_note: rateLimited
-            ? "محدودیت نرخ درخواست Gemini (rate limit) — کمی بعد دوباره اجرا کنید."
-            : `خطا در اجرا: ${msg.slice(0, 120)}`,
-        });
-        results.push({
-          scores: {
-            faithfulness: 0,
-            relevance: 0,
-            tone: 0,
-            retrieval: 0,
-            verdict: "fail",
-            note: "error",
-          },
-        });
-      }
-      // Breathe between questions so bursts don't trip the RPM limit.
-      if (cursor < list.length) await sleep(GAP_MS);
-    }
-  }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-
-  const avg = (pick: (s: JudgeScores) => number) =>
-    Math.round(
-      (results.reduce((sum, r) => sum + pick(r.scores), 0) / Math.max(1, results.length)) * 10,
-    );
-
-  const totals = {
-    faithfulness: avg((s) => s.faithfulness),
-    relevance: avg((s) => s.relevance),
-    tone: avg((s) => s.tone),
-    retrieval: avg((s) => s.retrieval),
-    pass: results.filter((r) => r.scores.verdict === "pass").length,
-    warn: results.filter((r) => r.scores.verdict === "warn").length,
-    fail: results.filter((r) => r.scores.verdict === "fail").length,
+  const totals: EvalTotals = {
+    faithfulness: avg("faithfulness"),
+    relevance: avg("relevance"),
+    tone: avg("tone"),
+    retrieval: avg("retrieval"),
+    pass: rows.filter((r) => r.verdict === "pass").length,
+    warn: rows.filter((r) => r.verdict === "warn").length,
+    fail: rows.filter((r) => r.verdict === "fail").length,
     health: 0,
   };
   // Health = weighted score; faithfulness matters most (anti-hallucination).
   totals.health = Math.round(
     totals.faithfulness * 0.4 + totals.relevance * 0.25 + totals.tone * 0.15 + totals.retrieval * 0.2,
   );
+  return totals;
+}
 
+// If every active question now has a result, compute totals from the persisted
+// rows (not in-memory, since a run spans several passes) and mark the run done.
+async function finalizeIfComplete(runId: string, total: number): Promise<boolean> {
+  const supabase = getAdminClient();
+  const { data } = await supabase
+    .from("eval_results")
+    .select("scores, verdict")
+    .eq("run_id", runId);
+  const rows = (data ?? []) as { scores: Record<string, number> | null; verdict: string | null }[];
+  if (rows.length < total) return false;
+
+  const totals = computeTotals(rows);
   await supabase
     .from("eval_runs")
     .update({ status: "done", totals, finished_at: new Date().toISOString() })
     .eq("id", runId);
+  return true;
+}
 
-  return { runId, questionCount: list.length, totals };
+// Force-close a stalled run: fill any un-scored questions with fail rows, then
+// finalize. Used when the client hits its continue cap (e.g. persistent rate
+// limits) so a run never stays "running" forever.
+export async function forceFinalize(runId: string): Promise<EvalTotals> {
+  const supabase = getAdminClient();
+  const questions = await loadActiveQuestions();
+  const doneIds = await loadDoneIds(runId);
+  const missing = questions.filter((q) => !doneIds.has(q.id));
+
+  if (missing.length > 0) {
+    await supabase.from("eval_results").insert(
+      missing.map((q) => ({
+        run_id: runId,
+        question_id: q.id,
+        question: q.question,
+        category: q.category,
+        verdict: "fail",
+        judge_note: "به سقف تلاش رسید — بدون سنجش کامل بسته شد (احتمالاً محدودیت نرخ Gemini).",
+      })),
+    );
+  }
+
+  const { data } = await supabase
+    .from("eval_results")
+    .select("scores, verdict")
+    .eq("run_id", runId);
+  const rows = (data ?? []) as { scores: Record<string, number> | null; verdict: string | null }[];
+  const totals = computeTotals(rows);
+  await supabase
+    .from("eval_runs")
+    .update({ status: "done", totals, finished_at: new Date().toISOString() })
+    .eq("id", runId);
+  return totals;
+}
+
+// Create an eval_runs row synchronously and return its id so the caller can
+// return it to the client immediately, then run the heavy loop in the background.
+export async function createEvalRun(): Promise<{ runId: string; total: number }> {
+  const supabase = getAdminClient();
+  const config = await getRuntimeChatConfig();
+
+  const list = await loadActiveQuestions();
+  const total = list.length;
+  if (total === 0) throw new Error("no active questions");
+
+  const { data: run, error } = await supabase
+    .from("eval_runs")
+    .insert({
+      status: "running",
+      model: config.modelId,
+      judge_model: JUDGE_MODEL_ID,
+      question_count: total,
+    })
+    .select("id")
+    .single();
+  if (error || !run) throw new Error(`eval run insert failed: ${error?.message}`);
+  return { runId: run.id as string, total };
+}
+
+// Execute (or resume) an existing run. Time-bounded and resumable: processes the
+// questions not yet scored, persisting each result as it goes, and stops before
+// the function's time budget. Returns progress; call again (same runId) to
+// continue until `complete` is true.
+export async function runEvaluation(runId: string): Promise<EvalRunProgress> {
+  const supabase = getAdminClient();
+  const config = await getRuntimeChatConfig();
+
+  const list = await loadActiveQuestions();
+  const total = list.length;
+  if (total === 0) return { runId, complete: true, done: 0, total: 0 };
+
+  // Resuming: make sure the row reflects "running" again.
+  await supabase.from("eval_runs").update({ status: "running" }).eq("id", runId);
+
+  const doneIds = await loadDoneIds(runId);
+  const pending = list.filter((q) => !doneIds.has(q.id));
+
+  const startedAt = Date.now();
+  for (let i = 0; i < pending.length; i++) {
+    if (Date.now() - startedAt > TIME_BUDGET_MS) break; // out of budget — next pass continues
+    const q = pending[i];
+    try {
+      const chunks = await withRetry(() => retrieve(q.question, q.locale, 5), "retrieve");
+      const system = buildSystemPrompt({
+        chunks,
+        memorySummary: null,
+        persona: config.persona,
+      });
+      const { text: answer } = await withRetry(
+        () =>
+          generateText({
+            model: chatModel(config.modelId),
+            temperature: config.temperature ?? undefined,
+            maxOutputTokens: config.maxOutputTokens ?? undefined,
+            system,
+            prompt: q.question,
+          }),
+        "answer",
+      );
+
+      const scores = await withRetry(() => judgeAnswer({ question: q, answer, chunks }), "judge");
+
+      await supabase.from("eval_results").insert({
+        run_id: runId,
+        question_id: q.id,
+        question: q.question,
+        category: q.category,
+        answer,
+        retrieved: chunks.map((c) => ({
+          title: c.title,
+          similarity: Math.round(c.similarity * 100) / 100,
+        })),
+        scores: {
+          faithfulness: scores.faithfulness,
+          relevance: scores.relevance,
+          tone: scores.tone,
+          retrieval: scores.retrieval,
+        },
+        verdict: scores.verdict,
+        judge_note: scores.note,
+      });
+    } catch (err) {
+      // No result row is written on failure, so this question is retried on the
+      // next pass. A rate limit means the minute quota is spent — end the pass
+      // and let the caller resume after a delay instead of burning the budget.
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`eval question failed (${q.id}): ${msg.slice(0, 120)}`);
+      if (isRateLimit(msg)) break;
+      // Other (non-transient) error: skip this question and try the next.
+      continue;
+    }
+    if (i < pending.length - 1) await sleep(GAP_MS);
+  }
+
+  const complete = await finalizeIfComplete(runId, total);
+  const done = (await loadDoneIds(runId)).size;
+  return { runId, complete, done, total };
 }

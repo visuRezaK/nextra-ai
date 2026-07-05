@@ -1,37 +1,135 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/admin/auth";
 import { logAudit } from "@/lib/admin/audit";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
-import { runEvaluation, type EvalRunSummary } from "@/lib/chatbot/evaluate";
+import { createEvalRun, runEvaluation, forceFinalize } from "@/lib/chatbot/evaluate";
 
-export type RunEvalState =
-  | { ok: true; summary: EvalRunSummary }
+export type StartEvalState =
+  | { ok: true; runId: string; total: number }
   | { ok: false; error: string }
   | undefined;
 
-export async function runEvaluationAction(): Promise<RunEvalState> {
+// Start a run: create the row synchronously, kick off the heavy loop in the
+// background (after), and return the runId immediately. The client then polls
+// getRunStatusAction and calls continueEvaluationAction until the run is done,
+// so the browser never holds a multi-minute request (which was timing out).
+export async function startEvaluationAction(): Promise<StartEvalState> {
   const { user } = await requireRole(["editor"]);
 
+  let runId: string;
+  let total: number;
   try {
-    const summary = await runEvaluation();
-    await logAudit({
-      actor: user,
-      action: "eval.run",
-      target: summary.runId,
-      meta: summary.totals,
-    });
-    revalidatePath("/admin/evaluation");
-    return { ok: true, summary };
+    ({ runId, total } = await createEvalRun());
   } catch (err) {
-    console.error("runEvaluationAction error:", err);
+    console.error("startEvaluationAction error:", err);
     const message =
       err instanceof Error && err.message === "no active questions"
         ? "هیچ سؤال فعالی در مجموعهٔ آزمون نیست — اول سؤال اضافه کنید."
-        : "اجرای ارزیابی ناموفق بود. (اگر جدول‌ها ساخته نشده‌اند، supabase/admin4.sql را اجرا کنید.)";
+        : "شروع ارزیابی ناموفق بود. (اگر جدول‌ها ساخته نشده‌اند، supabase/admin4.sql را اجرا کنید.)";
     return { ok: false, error: message };
   }
+
+  after(async () => {
+    try {
+      const progress = await runEvaluation(runId);
+      if (progress.complete) {
+        await logAudit({ actor: user, action: "eval.run", target: runId, meta: { total } });
+      }
+    } catch (err) {
+      console.error("eval background pass failed:", err);
+    }
+  });
+
+  revalidatePath("/admin/evaluation");
+  return { ok: true, runId, total };
+}
+
+// Resume an unfinished run in the background (client calls this when a pass ends
+// before the run is complete — e.g. the free Gemini tier's rate limit).
+export async function continueEvaluationAction(runId: string): Promise<{ ok: boolean }> {
+  const { user } = await requireRole(["editor"]);
+  if (!runId) return { ok: false };
+
+  after(async () => {
+    try {
+      const progress = await runEvaluation(runId);
+      if (progress.complete) {
+        await logAudit({ actor: user, action: "eval.run", target: runId });
+      }
+    } catch (err) {
+      console.error("eval continue pass failed:", err);
+    }
+  });
+  return { ok: true };
+}
+
+export type RunStatus = {
+  status: "running" | "done" | "failed" | "missing";
+  done: number;
+  total: number;
+  totals: Record<string, number>;
+};
+
+// Lightweight status for client polling: how many questions are scored, and the
+// run's status/totals. `done` is the count of persisted per-question results.
+export async function getRunStatusAction(runId: string): Promise<RunStatus> {
+  await requireRole(["editor"]);
+  const supabase = getAdminClient();
+
+  const [runRes, doneRes] = await Promise.all([
+    supabase.from("eval_runs").select("status, question_count, totals").eq("id", runId).maybeSingle(),
+    supabase.from("eval_results").select("*", { count: "exact", head: true }).eq("run_id", runId),
+  ]);
+
+  const run = runRes.data;
+  if (!run) return { status: "missing", done: 0, total: 0, totals: {} };
+  return {
+    status: run.status as RunStatus["status"],
+    done: doneRes.count ?? 0,
+    total: run.question_count ?? 0,
+    totals: (run.totals ?? {}) as Record<string, number>,
+  };
+}
+
+// Force-close a stalled run (client hit its continue cap). Fills any un-scored
+// questions with fail rows and marks the run done, so it never stays "running".
+export async function finalizeRunAction(runId: string): Promise<{ ok: boolean }> {
+  const { user } = await requireRole(["editor"]);
+  if (!runId) return { ok: false };
+  try {
+    await forceFinalize(runId);
+    await logAudit({ actor: user, action: "eval.finalize", target: runId });
+    revalidatePath("/admin/evaluation");
+    return { ok: true };
+  } catch (err) {
+    console.error("finalizeRunAction error:", err);
+    return { ok: false };
+  }
+}
+
+// Mark a dead run as failed (used from the run history for stuck rows).
+export async function markRunFailedAction(formData: FormData): Promise<void> {
+  const { user } = await requireRole(["editor"]);
+  const runId = String(formData.get("runId") ?? "");
+  if (!runId) return;
+
+  const supabase = getAdminClient();
+  await supabase
+    .from("eval_runs")
+    .update({ status: "failed", finished_at: new Date().toISOString() })
+    .eq("id", runId);
+  await logAudit({ actor: user, action: "eval.mark_failed", target: runId });
+  revalidatePath("/admin/evaluation");
+}
+
+// Continue a stuck run from the run history (server-action form variant).
+export async function continueRunFormAction(formData: FormData): Promise<void> {
+  const runId = String(formData.get("runId") ?? "");
+  await continueEvaluationAction(runId);
+  revalidatePath("/admin/evaluation");
 }
 
 export type QuestionState = { ok: boolean; error?: string } | undefined;

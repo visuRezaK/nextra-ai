@@ -1,42 +1,169 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  runEvaluationAction,
+  startEvaluationAction,
+  continueEvaluationAction,
+  getRunStatusAction,
+  finalizeRunAction,
   addQuestionAction,
   seedQuestionsAction,
-  type RunEvalState,
   type QuestionState,
 } from "./actions";
 
 const fa = (n: number) => n.toLocaleString("fa-IR");
 
+const POLL_MS = 4500;
+const STALL_MS = 25_000; // no new result this long -> assume the pass ended, continue
+const MAX_CONTINUES = 6; // cap so persistent rate limits can't loop forever
+
+type Phase =
+  | { kind: "idle" }
+  | { kind: "running"; done: number; total: number }
+  | { kind: "done"; health: number; pass: number; warn: number; fail: number }
+  | { kind: "error"; message: string };
+
+// The run executes in the background (server action + after); this button starts
+// it, then polls status and auto-continues stalled passes until it's done, so
+// the browser never holds a multi-minute request.
 export function RunEvalButton({ questionCount }: { questionCount: number }) {
-  const [state, action, pending] = useActionState<RunEvalState, FormData>(
-    runEvaluationAction,
-    undefined,
+  const router = useRouter();
+  const [phase, setPhase] = useState<Phase>({ kind: "idle" });
+
+  const runIdRef = useRef<string | null>(null);
+  const lastDoneRef = useRef(0);
+  const lastProgressAtRef = useRef(0);
+  const continuesRef = useRef(0);
+  const busyRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stop = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => stop(), [stop]);
+
+  const finishFrom = useCallback(
+    (totals: Record<string, number>) => {
+      setPhase({
+        kind: "done",
+        health: Number(totals.health ?? 0),
+        pass: Number(totals.pass ?? 0),
+        warn: Number(totals.warn ?? 0),
+        fail: Number(totals.fail ?? 0),
+      });
+      router.refresh();
+    },
+    [router],
   );
 
+  const poll = useCallback(async () => {
+    const runId = runIdRef.current;
+    if (!runId) return;
+
+    let status;
+    try {
+      status = await getRunStatusAction(runId);
+    } catch {
+      return; // transient — try again next tick
+    }
+
+    if (status.status === "done") {
+      stop();
+      finishFrom(status.totals);
+      return;
+    }
+    if (status.status === "failed" || status.status === "missing") {
+      stop();
+      setPhase({ kind: "error", message: "اجرا ناتمام ماند. دوباره تلاش کنید." });
+      router.refresh();
+      return;
+    }
+
+    // running
+    const now = Date.now();
+    if (status.done > lastDoneRef.current) {
+      lastDoneRef.current = status.done;
+      lastProgressAtRef.current = now;
+    }
+    setPhase({ kind: "running", done: status.done, total: status.total });
+
+    // A background pass ended before finishing (rate limit / budget) -> continue.
+    const stalled = now - lastProgressAtRef.current > STALL_MS;
+    if (stalled && !busyRef.current) {
+      busyRef.current = true;
+      try {
+        if (continuesRef.current >= MAX_CONTINUES) {
+          stop();
+          await finalizeRunAction(runId);
+          const s = await getRunStatusAction(runId);
+          finishFrom(s.totals);
+          return;
+        }
+        continuesRef.current += 1;
+        lastProgressAtRef.current = now; // reset the stall window for the new pass
+        await continueEvaluationAction(runId);
+      } finally {
+        busyRef.current = false;
+      }
+    }
+  }, [finishFrom, router, stop]);
+
+  const start = useCallback(async () => {
+    runIdRef.current = null;
+    lastDoneRef.current = 0;
+    lastProgressAtRef.current = Date.now();
+    continuesRef.current = 0;
+    busyRef.current = false;
+    setPhase({ kind: "running", done: 0, total: questionCount });
+
+    const res = await startEvaluationAction();
+    if (!res || !res.ok) {
+      setPhase({ kind: "error", message: res?.error ?? "شروع ارزیابی ناموفق بود." });
+      return;
+    }
+    runIdRef.current = res.runId;
+    lastProgressAtRef.current = Date.now();
+    setPhase({ kind: "running", done: 0, total: res.total });
+    stop();
+    timerRef.current = setInterval(poll, POLL_MS);
+  }, [poll, questionCount, stop]);
+
+  const running = phase.kind === "running";
+
   return (
-    <form action={action} className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       <button
-        type="submit"
-        disabled={pending || questionCount === 0}
+        type="button"
+        onClick={start}
+        disabled={running || questionCount === 0}
         className="self-start rounded-lg bg-accent px-5 py-2 text-sm text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
       >
-        {pending
-          ? `در حال اجرای ${fa(questionCount)} سؤال + داوری… (تا چند دقیقه طول می‌کشد)`
+        {running
+          ? `در حال اجرا… ${fa(phase.done)} از ${fa(phase.total)} سنجیده شد`
           : `▶ اجرای ارزیابی (${fa(questionCount)} سؤال فعال)`}
       </button>
-      {state?.ok ? (
-        <p className="text-sm text-emerald-600">
-          ارزیابی تمام شد — امتیاز سلامت: ٪{fa(state.summary.totals.health)} (
-          {fa(state.summary.totals.pass)} قبول · {fa(state.summary.totals.warn)} هشدار ·{" "}
-          {fa(state.summary.totals.fail)} مردود)
+
+      {running ? (
+        <p className="text-sm text-muted">
+          در پس‌زمینه اجرا می‌شود؛ لازم نیست صفحه را ببندید. (با تحمل محدودیت نرخ Gemini، ممکن است
+          چند دقیقه طول بکشد و خودکار ادامه یابد)
         </p>
       ) : null}
-      {state && !state.ok ? <p className="text-sm text-red-500">{state.error}</p> : null}
-    </form>
+
+      {phase.kind === "done" ? (
+        <p className="text-sm text-emerald-600">
+          ارزیابی تمام شد — امتیاز سلامت: ٪{fa(phase.health)} ({fa(phase.pass)} قبول ·{" "}
+          {fa(phase.warn)} هشدار · {fa(phase.fail)} مردود)
+        </p>
+      ) : null}
+
+      {phase.kind === "error" ? <p className="text-sm text-red-500">{phase.message}</p> : null}
+    </div>
   );
 }
 

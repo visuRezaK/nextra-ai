@@ -3,11 +3,20 @@ import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { PageTitle, StatCard, AdminTable, Badge, fa, faDate } from "@/components/admin/ui";
 import { RunEvalButton, SeedButton, AddQuestionForm } from "./eval-client";
-import { deleteQuestionAction } from "./actions";
+import { deleteQuestionAction, continueRunFormAction, markRunFailedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
-// A full run = (retrieve + answer + judge) per question; give it room.
+// Background eval passes run via after() within this segment's budget.
 export const maxDuration = 300;
+
+// A run whose last activity is older than this while still "running" is dead
+// (function was killed / tab closed mid-pass) — offer continue or mark-failed.
+const STALE_RUN_MS = 15 * 60 * 1000;
+
+// Module-scope helper so the render body stays free of impure time calls.
+function isStaleRun(status: string, startedAt: string): boolean {
+  return status === "running" && Date.now() - new Date(startedAt).getTime() > STALE_RUN_MS;
+}
 
 const CATEGORY_LABELS: Record<string, { label: string; tone: "accent" | "success" | "neutral" }> = {
   kb: { label: "در دانش", tone: "accent" },
@@ -138,13 +147,22 @@ export default async function EvaluationPage() {
           <AdminTable headers={["تاریخ", "مدل", "سؤالات", "سلامت", "نتایج", ""]} empty={false}>
             {runs.map((r) => {
               const t = (r.totals ?? {}) as Record<string, number>;
+              const stale = isStaleRun(r.status, r.started_at);
+              const statusLabel =
+                r.status === "done"
+                  ? `٪${fa(t.health ?? 0)}`
+                  : r.status === "running"
+                    ? stale
+                      ? "ناتمام"
+                      : "در حال اجرا…"
+                    : "خطا";
               return (
                 <tr key={r.id}>
                   <td className="px-4 py-3 text-muted">{faDate(r.started_at)}</td>
                   <td className="px-4 py-3" dir="ltr">{r.model ?? "—"}</td>
                   <td className="px-4 py-3">{fa(r.question_count)}</td>
-                  <td className="px-4 py-3 font-medium">
-                    {r.status === "done" ? `٪${fa(t.health ?? 0)}` : r.status === "running" ? "در حال اجرا…" : "خطا"}
+                  <td className={`px-4 py-3 font-medium ${stale ? "text-amber-600" : ""}`}>
+                    {statusLabel}
                   </td>
                   <td className="px-4 py-3 text-muted">
                     {r.status === "done"
@@ -152,9 +170,27 @@ export default async function EvaluationPage() {
                       : "—"}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/evaluation/${r.id}`} className="text-accent hover:underline">
-                      جزئیات
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link href={`/admin/evaluation/${r.id}`} className="text-accent hover:underline">
+                        جزئیات
+                      </Link>
+                      {stale ? (
+                        <>
+                          <form action={continueRunFormAction}>
+                            <input type="hidden" name="runId" value={r.id} />
+                            <button type="submit" className="text-emerald-600 hover:underline">
+                              ادامه اجرا
+                            </button>
+                          </form>
+                          <form action={markRunFailedAction}>
+                            <input type="hidden" name="runId" value={r.id} />
+                            <button type="submit" className="text-red-500 hover:underline">
+                              علامت خطا
+                            </button>
+                          </form>
+                        </>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               );
