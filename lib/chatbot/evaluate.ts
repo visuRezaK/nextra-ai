@@ -34,6 +34,12 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const isRateLimit = (msg: string) => /429|rate|quota|resource_exhausted/i.test(msg);
 
+// Verdict for questions that couldn't be scored (rate limit / hit the retry cap).
+// They are NOT failures — they are excluded from averages so they don't tank the
+// health score, and shown as "not scored" in the UI.
+const SKIPPED = "skipped";
+const SKIPPED_NOTE = "سنجیده نشد — به سقف تلاش رسید (احتمالاً محدودیت نرخ Gemini). دوباره اجرا کنید.";
+
 // Retry transient failures (429 rate limits / 503) with exponential backoff.
 async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
   const delays = [2000, 5000, 12000];
@@ -131,6 +137,8 @@ export interface EvalTotals {
   pass: number;
   warn: number;
   fail: number;
+  scored: number; // questions actually judged (basis of the averages)
+  skipped: number; // questions that couldn't be scored (rate limit)
 }
 
 // One background pass over the golden set. Returns live progress so the caller
@@ -155,31 +163,63 @@ async function loadActiveQuestions() {
   return (data ?? []) as EvalQuestion[];
 }
 
-// Question ids that already have a persisted result for this run.
-async function loadDoneIds(runId: string): Promise<Set<string>> {
+interface ResultRow {
+  question_id: string | null;
+  scores: Record<string, number> | null;
+  verdict: string | null;
+}
+
+// All result rows for a run (used to derive progress + totals). Kept small.
+async function loadResults(runId: string): Promise<ResultRow[]> {
   const supabase = getAdminClient();
   const { data } = await supabase
     .from("eval_results")
-    .select("question_id")
+    .select("question_id, scores, verdict")
     .eq("run_id", runId);
-  return new Set((data ?? []).map((r) => r.question_id as string).filter(Boolean));
+  return (data ?? []) as ResultRow[];
 }
 
-function computeTotals(
-  rows: { scores: Record<string, number> | null; verdict: string | null }[],
-): EvalTotals {
-  const n = Math.max(1, rows.length);
+// Distinct question ids that already have a GENUINE (non-skipped) result — used
+// both to resume (don't re-score) and to decide when a run is complete.
+function scoredIds(rows: ResultRow[]): Set<string> {
+  return new Set(
+    rows.filter((r) => r.verdict !== SKIPPED && r.question_id).map((r) => r.question_id as string),
+  );
+}
+
+async function loadDoneIds(runId: string): Promise<Set<string>> {
+  return scoredIds(await loadResults(runId));
+}
+
+// Totals over DISTINCT, genuinely-scored questions only. Duplicate rows (from a
+// past concurrency bug) and skipped rows are excluded so they can't skew the
+// health score.
+function computeTotals(rows: ResultRow[]): EvalTotals {
+  // De-duplicate by question id, preferring a scored row over a skipped one.
+  const byQ = new Map<string, ResultRow>();
+  for (const r of rows) {
+    const key = r.question_id ?? JSON.stringify(r.scores);
+    const existing = byQ.get(key);
+    if (!existing || (existing.verdict === SKIPPED && r.verdict !== SKIPPED)) byQ.set(key, r);
+  }
+  const unique = [...byQ.values()];
+  const scored = unique.filter((r) => r.verdict !== SKIPPED);
+  const skipped = unique.length - scored.length;
+
+  const n = Math.max(1, scored.length);
   const avg = (key: keyof JudgeScores) =>
-    Math.round((rows.reduce((s, r) => s + (Number(r.scores?.[key]) || 0), 0) / n) * 10);
+    Math.round((scored.reduce((s, r) => s + (Number(r.scores?.[key]) || 0), 0) / n) * 10);
 
   const totals: EvalTotals = {
     faithfulness: avg("faithfulness"),
     relevance: avg("relevance"),
     tone: avg("tone"),
     retrieval: avg("retrieval"),
-    pass: rows.filter((r) => r.verdict === "pass").length,
-    warn: rows.filter((r) => r.verdict === "warn").length,
-    fail: rows.filter((r) => r.verdict === "fail").length,
+    pass: scored.filter((r) => r.verdict === "pass").length,
+    warn: scored.filter((r) => r.verdict === "warn").length,
+    fail: scored.filter((r) => r.verdict === "fail").length,
+    scored: scored.length,
+    skipped,
     health: 0,
   };
   // Health = weighted score; faithfulness matters most (anti-hallucination).
@@ -189,28 +229,24 @@ function computeTotals(
   return totals;
 }
 
-// If every active question now has a result, compute totals from the persisted
-// rows (not in-memory, since a run spans several passes) and mark the run done.
+// If every active question now has a genuine result, compute totals from the
+// persisted rows (not in-memory, since a run spans several passes) and mark done.
 async function finalizeIfComplete(runId: string, total: number): Promise<boolean> {
-  const supabase = getAdminClient();
-  const { data } = await supabase
-    .from("eval_results")
-    .select("scores, verdict")
-    .eq("run_id", runId);
-  const rows = (data ?? []) as { scores: Record<string, number> | null; verdict: string | null }[];
-  if (rows.length < total) return false;
+  const rows = await loadResults(runId);
+  if (scoredIds(rows).size < total) return false;
 
-  const totals = computeTotals(rows);
+  const supabase = getAdminClient();
   await supabase
     .from("eval_runs")
-    .update({ status: "done", totals, finished_at: new Date().toISOString() })
+    .update({ status: "done", totals: computeTotals(rows), finished_at: new Date().toISOString() })
     .eq("id", runId);
   return true;
 }
 
-// Force-close a stalled run: fill any un-scored questions with fail rows, then
-// finalize. Used when the client hits its continue cap (e.g. persistent rate
-// limits) so a run never stays "running" forever.
+// Force-close a stalled run: mark any un-scored questions as "skipped" (NOT
+// failed — they're excluded from the averages), then finalize. Used when the
+// client hits its continue cap (persistent rate limits) so a run never stays
+// "running" forever and the health score reflects only what was actually judged.
 export async function forceFinalize(runId: string): Promise<EvalTotals> {
   const supabase = getAdminClient();
   const questions = await loadActiveQuestions();
@@ -224,18 +260,13 @@ export async function forceFinalize(runId: string): Promise<EvalTotals> {
         question_id: q.id,
         question: q.question,
         category: q.category,
-        verdict: "fail",
-        judge_note: "به سقف تلاش رسید — بدون سنجش کامل بسته شد (احتمالاً محدودیت نرخ Gemini).",
+        verdict: SKIPPED,
+        judge_note: SKIPPED_NOTE,
       })),
     );
   }
 
-  const { data } = await supabase
-    .from("eval_results")
-    .select("scores, verdict")
-    .eq("run_id", runId);
-  const rows = (data ?? []) as { scores: Record<string, number> | null; verdict: string | null }[];
-  const totals = computeTotals(rows);
+  const totals = computeTotals(await loadResults(runId));
   await supabase
     .from("eval_runs")
     .update({ status: "done", totals, finished_at: new Date().toISOString() })
@@ -309,6 +340,16 @@ export async function runEvaluation(runId: string): Promise<EvalRunProgress> {
       );
 
       const scores = await withRetry(() => judgeAnswer({ question: q, answer, chunks }), "judge");
+
+      // Defensive: skip if a row already landed for this question (guards against
+      // any residual overlap between passes so we never write duplicates).
+      const { data: existing } = await supabase
+        .from("eval_results")
+        .select("id")
+        .eq("run_id", runId)
+        .eq("question_id", q.id)
+        .limit(1);
+      if (existing && existing.length > 0) continue;
 
       await supabase.from("eval_results").insert({
         run_id: runId,

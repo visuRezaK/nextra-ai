@@ -10,6 +10,7 @@ const VERDICT: Record<string, { label: string; tone: "success" | "accent" | "neu
   pass: { label: "✓ قبول", tone: "success" },
   warn: { label: "⚠ هشدار", tone: "accent" },
   fail: { label: "✗ مردود", tone: "neutral" },
+  skipped: { label: "— سنجیده‌نشده", tone: "neutral" },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -67,16 +68,19 @@ export default async function EvalRunDetailPage({
         {rows.map((r) => {
           const v = VERDICT[r.verdict ?? ""] ?? VERDICT.fail;
           const s = (r.scores ?? {}) as Record<string, number>;
+          const skipped = r.verdict === "skipped";
           const retrieved = (r.retrieved ?? []) as { title: string | null; similarity: number }[];
           return (
             <section key={r.id} className="card-surface p-5">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <Badge tone={v.tone}>{v.label}</Badge>
                 <Badge tone="neutral">{CATEGORY_LABELS[r.category] ?? r.category}</Badge>
-                <span className="text-xs text-muted" dir="ltr">
-                  F{fa(s.faithfulness ?? 0)} · R{fa(s.relevance ?? 0)} · T{fa(s.tone ?? 0)} · Ret
-                  {fa(s.retrieval ?? 0)}
-                </span>
+                {skipped ? null : (
+                  <span className="text-xs text-muted" dir="ltr">
+                    F{fa(s.faithfulness ?? 0)} · R{fa(s.relevance ?? 0)} · T{fa(s.tone ?? 0)} · Ret
+                    {fa(s.retrieval ?? 0)}
+                  </span>
+                )}
               </div>
               <p className="font-medium">{r.question}</p>
               {r.answer ? (

@@ -70,26 +70,45 @@ export type RunStatus = {
   status: "running" | "done" | "failed" | "missing";
   done: number;
   total: number;
+  lastActivityAt: number; // epoch ms of the newest result (or run start)
   totals: Record<string, number>;
 };
 
-// Lightweight status for client polling: how many questions are scored, and the
-// run's status/totals. `done` is the count of persisted per-question results.
+// Lightweight status for client polling. `done` = DISTINCT genuinely-scored
+// questions (skipped/duplicate rows excluded). `lastActivityAt` lets the client
+// tell whether a background pass is still writing results — it only fires a
+// continue after the run has gone quiet, which prevents overlapping passes.
 export async function getRunStatusAction(runId: string): Promise<RunStatus> {
   await requireRole(["editor"]);
   const supabase = getAdminClient();
 
-  const [runRes, doneRes] = await Promise.all([
-    supabase.from("eval_runs").select("status, question_count, totals").eq("id", runId).maybeSingle(),
-    supabase.from("eval_results").select("*", { count: "exact", head: true }).eq("run_id", runId),
+  const [runRes, rowsRes] = await Promise.all([
+    supabase
+      .from("eval_runs")
+      .select("status, question_count, totals, started_at")
+      .eq("id", runId)
+      .maybeSingle(),
+    supabase.from("eval_results").select("question_id, verdict, created_at").eq("run_id", runId),
   ]);
 
   const run = runRes.data;
-  if (!run) return { status: "missing", done: 0, total: 0, totals: {} };
+  if (!run) return { status: "missing", done: 0, total: 0, lastActivityAt: 0, totals: {} };
+
+  const rows = (rowsRes.data ?? []) as {
+    question_id: string | null;
+    verdict: string | null;
+    created_at: string;
+  }[];
+  const doneSet = new Set(
+    rows.filter((r) => r.verdict !== "skipped" && r.question_id).map((r) => r.question_id as string),
+  );
+  const lastResult = rows.reduce((max, r) => Math.max(max, new Date(r.created_at).getTime()), 0);
+
   return {
     status: run.status as RunStatus["status"],
-    done: doneRes.count ?? 0,
+    done: doneSet.size,
     total: run.question_count ?? 0,
+    lastActivityAt: Math.max(lastResult, new Date(run.started_at as string).getTime()),
     totals: (run.totals ?? {}) as Record<string, number>,
   };
 }

@@ -14,26 +14,30 @@ import {
 
 const fa = (n: number) => n.toLocaleString("fa-IR");
 
-const POLL_MS = 4500;
-const STALL_MS = 25_000; // no new result this long -> assume the pass ended, continue
-const MAX_CONTINUES = 6; // cap so persistent rate limits can't loop forever
+const POLL_MS = 5000;
+// Only continue once the run has been QUIET this long — i.e. no result written
+// for IDLE_MS. This means the previous background pass has ended, so continuing
+// can't spawn an overlapping pass (which previously caused duplicate rows and
+// wasted the rate-limit quota). It's also longer than a single rate-limited
+// question, so a slow-but-active pass is never mistaken for a dead one.
+const IDLE_MS = 75_000;
+const MAX_CONTINUES = 15; // plenty of passes for the free tier to recover between
 
 type Phase =
   | { kind: "idle" }
   | { kind: "running"; done: number; total: number }
-  | { kind: "done"; health: number; pass: number; warn: number; fail: number }
+  | { kind: "done"; health: number; pass: number; warn: number; fail: number; skipped: number }
   | { kind: "error"; message: string };
 
 // The run executes in the background (server action + after); this button starts
-// it, then polls status and auto-continues stalled passes until it's done, so
-// the browser never holds a multi-minute request.
+// it, then polls status and — only when the run has gone quiet — auto-continues
+// until it's done, so the browser never holds a multi-minute request and passes
+// never overlap.
 export function RunEvalButton({ questionCount }: { questionCount: number }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
   const runIdRef = useRef<string | null>(null);
-  const lastDoneRef = useRef(0);
-  const lastProgressAtRef = useRef(0);
   const continuesRef = useRef(0);
   const busyRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -55,6 +59,7 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
         pass: Number(totals.pass ?? 0),
         warn: Number(totals.warn ?? 0),
         fail: Number(totals.fail ?? 0),
+        skipped: Number(totals.skipped ?? 0),
       });
       router.refresh();
     },
@@ -63,7 +68,7 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
 
   const poll = useCallback(async () => {
     const runId = runIdRef.current;
-    if (!runId) return;
+    if (!runId || busyRef.current) return;
 
     let status;
     try {
@@ -85,38 +90,31 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
     }
 
     // running
-    const now = Date.now();
-    if (status.done > lastDoneRef.current) {
-      lastDoneRef.current = status.done;
-      lastProgressAtRef.current = now;
-    }
     setPhase({ kind: "running", done: status.done, total: status.total });
+    if (status.done >= status.total) return; // all scored; next poll will see "done"
 
-    // A background pass ended before finishing (rate limit / budget) -> continue.
-    const stalled = now - lastProgressAtRef.current > STALL_MS;
-    if (stalled && !busyRef.current) {
-      busyRef.current = true;
-      try {
-        if (continuesRef.current >= MAX_CONTINUES) {
-          stop();
-          await finalizeRunAction(runId);
-          const s = await getRunStatusAction(runId);
-          finishFrom(s.totals);
-          return;
-        }
-        continuesRef.current += 1;
-        lastProgressAtRef.current = now; // reset the stall window for the new pass
-        await continueEvaluationAction(runId);
-      } finally {
-        busyRef.current = false;
+    // Continue only if the run has gone quiet (previous pass ended) — this is
+    // what keeps passes from overlapping.
+    const quiet = Date.now() - status.lastActivityAt > IDLE_MS;
+    if (!quiet) return;
+
+    busyRef.current = true;
+    try {
+      if (continuesRef.current >= MAX_CONTINUES) {
+        stop();
+        await finalizeRunAction(runId); // give up on the stragglers, mark them skipped
+        finishFrom((await getRunStatusAction(runId)).totals);
+        return;
       }
+      continuesRef.current += 1;
+      await continueEvaluationAction(runId);
+    } finally {
+      busyRef.current = false;
     }
   }, [finishFrom, router, stop]);
 
   const start = useCallback(async () => {
     runIdRef.current = null;
-    lastDoneRef.current = 0;
-    lastProgressAtRef.current = Date.now();
     continuesRef.current = 0;
     busyRef.current = false;
     setPhase({ kind: "running", done: 0, total: questionCount });
@@ -127,7 +125,6 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
       return;
     }
     runIdRef.current = res.runId;
-    lastProgressAtRef.current = Date.now();
     setPhase({ kind: "running", done: 0, total: res.total });
     stop();
     timerRef.current = setInterval(poll, POLL_MS);
@@ -158,7 +155,14 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
       {phase.kind === "done" ? (
         <p className="text-sm text-emerald-600">
           ارزیابی تمام شد — امتیاز سلامت: ٪{fa(phase.health)} ({fa(phase.pass)} قبول ·{" "}
-          {fa(phase.warn)} هشدار · {fa(phase.fail)} مردود)
+          {fa(phase.warn)} هشدار · {fa(phase.fail)} مردود
+          {phase.skipped > 0 ? ` · ${fa(phase.skipped)} سنجیده‌نشده` : ""})
+          {phase.skipped > 0 ? (
+            <span className="block text-amber-600">
+              {fa(phase.skipped)} سؤال به‌خاطر محدودیت نرخ سنجیده نشد و در امتیاز حساب نشده — برای
+              نتیجهٔ کامل دوباره اجرا کنید.
+            </span>
+          ) : null}
         </p>
       ) : null}
 

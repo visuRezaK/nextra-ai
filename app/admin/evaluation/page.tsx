@@ -93,7 +93,13 @@ export default async function EvaluationPage() {
               ? `${fa((totals.pass as number) ?? 0)}✓ ${fa((totals.warn as number) ?? 0)}⚠ ${fa((totals.fail as number) ?? 0)}✗`
               : "—"
           }
-          hint={lastDone ? faDate(lastDone.started_at) : "هنوز اجرایی ثبت نشده"}
+          hint={
+            lastDone
+              ? (totals.skipped ?? 0) > 0
+                ? `${fa(totals.skipped as number)} سنجیده‌نشده (محدودیت نرخ)`
+                : faDate(lastDone.started_at)
+              : "هنوز اجرایی ثبت نشده"
+          }
         />
         <StatCard label="سؤالات آزمون" value={fa(questions.length)} />
         <StatCard
