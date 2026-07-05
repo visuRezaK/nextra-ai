@@ -14,6 +14,7 @@ const tabs: { href: string; label: string; roles: StaffRole[] }[] = [
   { href: "/admin/knowledge", label: "پایگاه دانش", roles: ["admin", "editor"] },
   { href: "/admin/persona", label: "پرسونا", roles: ["admin", "editor"] },
   { href: "/admin/playground", label: "پلی‌گراند", roles: ["admin", "editor"] },
+  { href: "/admin/evaluation", label: "ارزیابی", roles: ["admin", "editor"] },
   { href: "/admin/model", label: "تنظیمات مدل", roles: ["admin"] },
   { href: "/admin/telegram", label: "تلگرام", roles: ["admin"] },
   { href: "/admin/widget", label: "ویجت", roles: ["admin"] },
