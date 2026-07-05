@@ -103,7 +103,15 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
       if (continuesRef.current >= MAX_CONTINUES) {
         stop();
         await finalizeRunAction(runId); // give up on the stragglers, mark them skipped
-        finishFrom((await getRunStatusAction(runId)).totals);
+        const s = await getRunStatusAction(runId);
+        if (s.status === "done") finishFrom(s.totals);
+        else {
+          setPhase({
+            kind: "error",
+            message: "سنجش ناموفق — سهمیهٔ رایگان Gemini پر شده. کمی بعد دوباره اجرا کنید.",
+          });
+          router.refresh();
+        }
         return;
       }
       continuesRef.current += 1;
