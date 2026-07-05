@@ -15,8 +15,34 @@ import type { Locale } from "@/lib/i18n/config";
 // brand tone, and retrieval quality. Sessions/memory/tools are not touched.
 
 const JUDGE_MODEL_ID = "gemini-2.5-flash";
-const MAX_QUESTIONS_PER_RUN = 40;
-const CONCURRENCY = 3;
+// Sequential runs take ~10s/question; cap so a run finishes within the 300s
+// function limit. Larger golden sets can be run in a couple of passes.
+const MAX_QUESTIONS_PER_RUN = 25;
+// Sequential: the free Gemini tier rate-limits bursts, and each question makes
+// 3 calls (embed + answer + judge). One at a time, with retries, is reliable.
+const CONCURRENCY = 1;
+const GAP_MS = 1500; // pause between questions to stay under the RPM ceiling
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Retry transient failures (429 rate limits / 503) with exponential backoff.
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  const delays = [2000, 5000, 12000];
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const retriable = /429|rate|quota|503|overloaded|timeout/i.test(msg);
+      if (!retriable || attempt === delays.length) break;
+      console.warn(`[eval] ${label} retry ${attempt + 1} after: ${msg.slice(0, 80)}`);
+      await sleep(delays[attempt]);
+    }
+  }
+  throw lastErr;
+}
 
 const judgeSchema = z.object({
   faithfulness: z
@@ -141,21 +167,25 @@ export async function runEvaluation(): Promise<EvalRunSummary> {
     while (cursor < list.length) {
       const q = list[cursor++];
       try {
-        const chunks = await retrieve(q.question, q.locale, 5);
+        const chunks = await withRetry(() => retrieve(q.question, q.locale, 5), "retrieve");
         const system = buildSystemPrompt({
           chunks,
           memorySummary: null,
           persona: config.persona,
         });
-        const { text: answer } = await generateText({
-          model: chatModel(config.modelId),
-          temperature: config.temperature ?? undefined,
-          maxOutputTokens: config.maxOutputTokens ?? undefined,
-          system,
-          prompt: q.question,
-        });
+        const { text: answer } = await withRetry(
+          () =>
+            generateText({
+              model: chatModel(config.modelId),
+              temperature: config.temperature ?? undefined,
+              maxOutputTokens: config.maxOutputTokens ?? undefined,
+              system,
+              prompt: q.question,
+            }),
+          "answer",
+        );
 
-        const scores = await judgeAnswer({ question: q, answer, chunks });
+        const scores = await withRetry(() => judgeAnswer({ question: q, answer, chunks }), "judge");
         results.push({ scores });
 
         await supabase.from("eval_results").insert({
@@ -179,13 +209,17 @@ export async function runEvaluation(): Promise<EvalRunSummary> {
         });
       } catch (err) {
         console.error(`eval question failed (${q.id}):`, err);
+        const msg = err instanceof Error ? err.message : String(err);
+        const rateLimited = /429|rate|quota/i.test(msg);
         await supabase.from("eval_results").insert({
           run_id: runId,
           question_id: q.id,
           question: q.question,
           category: q.category,
           verdict: "fail",
-          judge_note: "اجرای این سؤال با خطا مواجه شد.",
+          judge_note: rateLimited
+            ? "محدودیت نرخ درخواست Gemini (rate limit) — کمی بعد دوباره اجرا کنید."
+            : `خطا در اجرا: ${msg.slice(0, 120)}`,
         });
         results.push({
           scores: {
@@ -198,6 +232,8 @@ export async function runEvaluation(): Promise<EvalRunSummary> {
           },
         });
       }
+      // Breathe between questions so bursts don't trip the RPM limit.
+      if (cursor < list.length) await sleep(GAP_MS);
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
