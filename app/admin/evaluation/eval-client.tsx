@@ -192,7 +192,7 @@ export function SeedButton() {
         disabled={pending}
         className="rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:border-accent/60 disabled:opacity-50"
       >
-        {pending ? "در حال افزودن…" : "افزودن ۱۲ سؤال پیشنهادی"}
+        {pending ? "در حال افزودن…" : "افزودن ۳۲ سؤال پیشنهادی"}
       </button>
       {state && !state.ok ? <span className="ms-2 text-sm text-red-500">{state.error}</span> : null}
     </form>

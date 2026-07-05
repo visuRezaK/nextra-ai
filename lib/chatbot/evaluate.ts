@@ -24,8 +24,10 @@ import type { Locale } from "@/lib/i18n/config";
 // is exhausted, despite never being called) — so using a different judge model
 // does NOT add budget. The judge stays on the same strong model as the answer.
 const JUDGE_MODEL_ID = "gemini-2.5-flash";
-// A golden set larger than this is scored across several runs.
-const MAX_QUESTIONS_PER_RUN = 25;
+// Max active questions loaded into a single run. Kept above the current golden
+// set (32) so one run covers the whole set — otherwise questions past the limit
+// are ordered out and never scored. A run still spans several background passes.
+const MAX_QUESTIONS_PER_RUN = 40;
 // Sequential: the free Gemini tier rate-limits bursts, and each question makes
 // 3 calls (embed + answer + judge). One at a time, with retries, is reliable.
 const GAP_MS = 1500; // pause between questions to stay under the RPM ceiling
@@ -38,11 +40,14 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const isRateLimit = (msg: string) => /429|rate|quota|resource_exhausted/i.test(msg);
 
-// The free Gemini tier allows ~20 generate_content requests/minute. Each question
-// makes 2 of them (answer + judge). Rather than burst past the ceiling and rely
-// on retries, we PACE the calls: keep at least MIN_FLASH_GAP_MS between them so we
-// stay comfortably under 20/min (~17/min) and a full pass rarely trips the limit.
-const MIN_FLASH_GAP_MS = 3500;
+// The free Gemini 2.5-flash tier allows only ~10 generate_content requests/minute
+// (the embedding call for retrieval is a different model, with its own quota, so
+// it doesn't count here). Each question makes 2 flash calls (answer + judge).
+// Rather than burst past the ceiling and rely on retries, we PACE the calls: keep
+// at least MIN_FLASH_GAP_MS between them so we stay under ~9/min and a full pass
+// rarely trips the limit. Earlier this was 3.5s (~17/min), which was tuned for a
+// mistaken 20/min ceiling and caused 429 storms that skipped most questions.
+const MIN_FLASH_GAP_MS = 7000;
 let lastFlashAt = 0;
 async function paceFlash() {
   const now = Date.now();
