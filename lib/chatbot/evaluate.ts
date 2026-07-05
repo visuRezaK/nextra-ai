@@ -19,12 +19,11 @@ import type { Locale } from "@/lib/i18n/config";
 // don't yet have a successful result for the run, stops cleanly before the
 // time budget, and is re-invoked (background) until every question is scored.
 
-// The judge runs on a DIFFERENT model than the bot's answer model on purpose:
-// each Gemini model has its own free-tier daily request budget, so scoring on
-// gemini-2.0-flash while answering on gemini-2.5-flash roughly halves the load
-// on each daily bucket — letting a full 12-question run fit the free tier.
-// (The answer must stay on the production chat model to test real behavior.)
-const JUDGE_MODEL_ID = "gemini-2.0-flash";
+// NOTE: the Gemini free tier's request quota is a SHARED project-wide daily
+// counter across models (verified: gemini-2.0-flash 429s the same when 2.5-flash
+// is exhausted, despite never being called) — so using a different judge model
+// does NOT add budget. The judge stays on the same strong model as the answer.
+const JUDGE_MODEL_ID = "gemini-2.5-flash";
 // A golden set larger than this is scored across several runs.
 const MAX_QUESTIONS_PER_RUN = 25;
 // Sequential: the free Gemini tier rate-limits bursts, and each question makes
