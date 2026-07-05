@@ -34,6 +34,19 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const isRateLimit = (msg: string) => /429|rate|quota|resource_exhausted/i.test(msg);
 
+// The free Gemini tier allows ~20 generate_content requests/minute. Each question
+// makes 2 of them (answer + judge). Rather than burst past the ceiling and rely
+// on retries, we PACE the calls: keep at least MIN_FLASH_GAP_MS between them so we
+// stay comfortably under 20/min (~17/min) and a full pass rarely trips the limit.
+const MIN_FLASH_GAP_MS = 3500;
+let lastFlashAt = 0;
+async function paceFlash() {
+  const now = Date.now();
+  const wait = Math.max(0, lastFlashAt + MIN_FLASH_GAP_MS - now);
+  lastFlashAt = Math.max(now, lastFlashAt + MIN_FLASH_GAP_MS);
+  if (wait > 0) await sleep(wait);
+}
+
 // Verdict for questions that couldn't be scored (rate limit / hit the retry cap).
 // They are NOT failures — they are excluded from averages so they don't tank the
 // health score, and shown as "not scored" in the UI.
@@ -331,18 +344,23 @@ export async function runEvaluation(runId: string): Promise<EvalRunProgress> {
         persona: config.persona,
       });
       const { text: answer } = await withRetry(
-        () =>
-          generateText({
+        async () => {
+          await paceFlash();
+          return generateText({
             model: chatModel(config.modelId),
             temperature: config.temperature ?? undefined,
             maxOutputTokens: config.maxOutputTokens ?? undefined,
             system,
             prompt: q.question,
-          }),
+          });
+        },
         "answer",
       );
 
-      const scores = await withRetry(() => judgeAnswer({ question: q, answer, chunks }), "judge");
+      const scores = await withRetry(async () => {
+        await paceFlash();
+        return judgeAnswer({ question: q, answer, chunks });
+      }, "judge");
 
       // Defensive: skip if a row already landed for this question (guards against
       // any residual overlap between passes so we never write duplicates).
