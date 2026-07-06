@@ -26,7 +26,7 @@ All user-facing copy lives in `lib/i18n/dictionaries/fa.json` and `en.json`. Eve
 The navbar (`components/site/navbar.tsx`) renders a two-line logo lockup: the brand name with the trailing word "Consulting" stripped, then "CONSULTING" in the accent eyebrow. This keeps the lockup visually correct for "Nextra AI / CONSULTING". The brand mark itself is an inline SVG (`Logo` in `components/icons.tsx`) — there is no image asset. Both the navbar and footer logo links carry `dir="ltr"` so the icon stays left of the wordmark even on the RTL Persian pages.
 
 ### Chatbot (RAG brain)
-The chatbot uses **Gemini 2.5 Flash** (direct Google AI Studio key, not Vercel billing). All models are configured in `lib/chatbot/models.ts`.
+The chatbot runs on **Gemini** via a direct Google AI Studio key (not Vercel billing) — mind the **free-tier daily request quota**. `lib/chatbot/models.ts` holds the fallback default and the `ALLOWED_CHAT_MODELS` whitelist, but the **live chat model, temperature, and persona are runtime-configurable, not hardcoded**: `getRuntimeChatConfig()` (`lib/chatbot/config.ts`, 60s cache) reads them from the Supabase `model_config` and `prompt_versions` tables, edited from the admin panel. So the running model may differ from the default (e.g. `gemini-2.5-flash-lite`). Embeddings stay on `gemini-embedding-001` (1536-dim, truncated).
 
 Request flow: `POST /api/chat/route.ts` → `lib/chatbot/brain.ts` (orchestrator):
 1. Resolve/create session in Supabase (`chat_sessions`)
@@ -42,12 +42,20 @@ Header: x-ingest-secret: <INGEST_SECRET env var>
 ```
 The response reports a per-locale chunk `count` — verify it changed as expected. **`buildChunks` only ingests dictionary keys it explicitly iterates** (e.g. `dict.faq.items`, `dict.chatbot_faq.items`, `dict.services.items`). Adding a *new* section to the JSON does nothing until you add a loop for it in `buildChunks` — and because the `Dictionary` type is derived from `en.json`, any new key must exist in **both** locale files or ingest/typecheck breaks. Display-only copy (e.g. `chat.suggestions` chips) does not need re-ingest.
 
-The chatbot widget (`components/chat/chat-widget.tsx`) is mounted in the locale layout and appears on every page.
+The chatbot widget (`components/chat/chat-widget.tsx`) is mounted in the locale layout and appears on every page. The same `brain.ts` also backs a Telegram bot (`app/api/telegram/route.ts`) and an embeddable script, so keep it transport-agnostic.
+
+**Evaluation:** `lib/chatbot/evaluate.ts` powers the admin golden-set quality check (`/admin/evaluation`). For each active `eval_questions` row it runs the REAL pipeline (retrieve → generate) then an LLM judge scores faithfulness / relevance / tone / retrieval. The runner is a background (`after()`) job that is **time-bounded, resumable across passes, and rate-limit-paced** — read the tuning constants at the top of the file (`MAX_QUESTIONS_PER_RUN`, `MIN_FLASH_GAP_MS`, `TIME_BUDGET_MS`) before changing them. A full run of the 32-question set exceeds the Gemini free-tier daily quota; the golden set is seeded from `SEED_QUESTIONS` in `app/admin/evaluation/actions.ts` (keep it in sync with `nextra-chatbot-test-set.md`).
 
 ### Auth & Database
 Supabase handles auth (email/password + Google OAuth). Auth callback at `app/auth/callback/route.ts`. Server-side client at `lib/supabase/server.ts`, client-side at `lib/supabase/client.ts`.
 
-Supabase tables used: `contacts` (leads from both booking form and chatbot), `chat_sessions`, `chat_messages`, `chat_memory`, `kb_documents` (pgvector, 1536-dim cosine).
+Supabase tables used: `contacts` (leads from both booking form and chatbot), `chat_sessions`, `chat_messages`, `chat_memory`, `kb_documents` (pgvector, 1536-dim cosine), plus `profiles` (staff roles), `model_config` / `prompt_versions` (runtime config), and `eval_questions` / `eval_runs` / `eval_results` (evaluation).
+
+### Admin panel (`/admin`)
+Persian-only staff panel, separate from the public `/[locale]` site. Access is role-based on `profiles.role` (`admin` / `editor` / `operator` / `viewer`) via `lib/admin/auth.ts`. **Every page and server action must call `requireRole([...])` / `requireAdmin()` before using the service-role client** (`lib/chatbot/supabase-admin.ts`); the gates fail closed, and `admin` is always allowed. Sections cover leads, conversations, feedback, knowledge-base uploads, persona, model config, prompt playground, evaluation, Telegram, the embeddable widget, and users. Mutations are recorded with `logAudit()` (`lib/admin/audit.ts`).
+
+### Database migrations
+Schema lives in `supabase/*.sql` (`schema.sql`, `chatbot.sql`, `admin.sql`, `admin2`–`admin4.sql`), applied **by hand in the Supabase SQL editor** — there is no migration tool. Files are idempotent and each admin phase adds one; a new table or feature does nothing (its pages/actions fail soft) until the corresponding SQL is run.
 
 ### Environment variables
 Key vars needed locally (pull via `vercel env pull`):
