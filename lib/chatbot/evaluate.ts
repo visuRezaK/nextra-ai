@@ -19,11 +19,13 @@ import type { Locale } from "@/lib/i18n/config";
 // don't yet have a successful result for the run, stops cleanly before the
 // time budget, and is re-invoked (background) until every question is scored.
 
-// NOTE: the Gemini free tier's request quota is a SHARED project-wide daily
-// counter across models (verified: gemini-2.0-flash 429s the same when 2.5-flash
-// is exhausted, despite never being called) — so using a different judge model
-// does NOT add budget. The judge stays on the same strong model as the answer.
-const JUDGE_MODEL_ID = "gemini-2.5-flash";
+// Judge model — gemini-2.5-flash-lite, matching the live answer model. The free
+// tier's request quota is PER-MODEL-PER-DAY (verified 2026-07-05: 2.5-flash and
+// flash-lite both answered 200 while 2.0-flash was separately exhausted), and
+// flash-lite's free daily allowance is far larger than 2.5-flash's (~20/day), so
+// keeping both answer and judge on flash-lite lets more of the golden set score
+// before hitting the free cap.
+const JUDGE_MODEL_ID = "gemini-2.5-flash-lite";
 // Max active questions loaded into a single run. Kept above the current golden
 // set (32) so one run covers the whole set — otherwise questions past the limit
 // are ordered out and never scored. A run still spans several background passes.
