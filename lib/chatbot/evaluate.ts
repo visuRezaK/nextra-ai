@@ -1,5 +1,6 @@
 import { generateText, generateObject } from "ai";
 import { z } from "zod";
+import { google } from "@ai-sdk/google";
 import { chatModel } from "./models";
 import { getRuntimeChatConfig } from "./config";
 import { retrieve, type RetrievedChunk } from "./rag";
@@ -126,10 +127,7 @@ async function judgeAnswer(params: {
     : "(هیچ chunkای بازیابی نشد)";
 
   const { object } = await generateObject({
-    // Route the judge through the same gateway-aware resolver as the answer model
-    // (JUDGE_MODEL_ID is an allowed chat model), so it isn't capped by the direct
-    // Google free-tier quota either.
-    model: chatModel(JUDGE_MODEL_ID),
+    model: google(JUDGE_MODEL_ID),
     schema: judgeSchema,
     prompt: `تو داور کیفیت یک چت‌بات RAG فارسی هستی (دستیار سایت Nextra AI Consulting — مشاور هوش مصنوعی برای کسب‌وکارها).
 
