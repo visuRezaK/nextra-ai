@@ -342,15 +342,18 @@ export interface EvaluationOverview {
 }
 
 // Everything the evaluation page needs to render the grouped, daily workflow:
-// the group breakdown (with each group's latest run) and the combined health
-// score across whichever groups have been evaluated so far.
+// the group breakdown (with each group's best run — see below) and the combined
+// health score across whichever groups have been evaluated so far.
 export async function loadEvaluationOverview(): Promise<EvaluationOverview> {
   const supabase = getAdminClient();
   const all = await loadAllActiveQuestions();
   const groupsTotal = groupCount(all.length);
 
-  // Latest done run per group. Guarded so the page still renders before
-  // admin5.sql has added the eval_group column.
+  // Best done run per group: the one that scored the MOST questions, newest as
+  // tiebreak. This keeps a fuller run from being clobbered by a later partial
+  // re-run (e.g. a re-run that hit the free-tier rate limit and only scored 2/8
+  // must not replace a previous complete 8/8 run in the health score). Guarded
+  // so the page still renders before admin5.sql has added the eval_group column.
   let migrated = true;
   const latestByGroup = new Map<
     number,
@@ -372,7 +375,11 @@ export async function loadEvaluationOverview(): Promise<EvaluationOverview> {
       totals: Record<string, number>;
       started_at: string;
     }[]) {
-      if (!latestByGroup.has(r.eval_group)) {
+      const cur = latestByGroup.get(r.eval_group);
+      // Rows arrive newest-first, so `cur` is always at least as recent as `r`;
+      // an older run replaces it only if it genuinely covered MORE questions.
+      const scored = Number(r.totals?.scored ?? 0);
+      if (!cur || scored > Number(cur.totals?.scored ?? 0)) {
         latestByGroup.set(r.eval_group, { id: r.id, totals: r.totals ?? {}, started_at: r.started_at });
       }
     }
