@@ -33,7 +33,10 @@ const JUDGE_MODEL_ID = "gemini-2.5-flash-lite";
 // halving Gemini usage and letting ~2x more questions score per day before
 // hitting Google's free daily cap. Falls back to Gemini when no Groq key is set,
 // so nothing breaks before the key is added. GROQ_JUDGE_MODEL overrides the id.
-const GROQ_JUDGE_MODEL_ID = process.env.GROQ_JUDGE_MODEL || "llama-3.3-70b-versatile";
+// Must be a Groq model that supports json_schema structured outputs (generateObject
+// needs it) — llama-3.3-70b does NOT. gpt-oss-120b does, and judged the Persian
+// golden set best in testing (correctly flags hallucination, fluent Persian notes).
+const GROQ_JUDGE_MODEL_ID = process.env.GROQ_JUDGE_MODEL || "openai/gpt-oss-120b";
 const usingGroqJudge = () => !!process.env.GROQ_API_KEY;
 const judgeModel = () => (usingGroqJudge() ? groq(GROQ_JUDGE_MODEL_ID) : google(JUDGE_MODEL_ID));
 // Id recorded on the run row + shown in the admin panel.
