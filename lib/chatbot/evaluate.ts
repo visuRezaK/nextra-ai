@@ -1,6 +1,7 @@
 import { generateText, generateObject } from "ai";
 import { z } from "zod";
 import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { chatModel } from "./models";
 import { getRuntimeChatConfig } from "./config";
 import { retrieve, type RetrievedChunk } from "./rag";
@@ -26,6 +27,17 @@ import type { Locale } from "@/lib/i18n/config";
 // keeping both answer and judge on flash-lite lets more of the golden set score
 // before hitting the free cap.
 const JUDGE_MODEL_ID = "gemini-2.5-flash-lite";
+// The judge only SCORES answers — it doesn't have to share the bot's (Gemini)
+// free-tier budget. When GROQ_API_KEY is set we run it on Groq's free tier
+// instead, so each question makes only ONE Gemini generate call (the answer) —
+// halving Gemini usage and letting ~2x more questions score per day before
+// hitting Google's free daily cap. Falls back to Gemini when no Groq key is set,
+// so nothing breaks before the key is added. GROQ_JUDGE_MODEL overrides the id.
+const GROQ_JUDGE_MODEL_ID = process.env.GROQ_JUDGE_MODEL || "llama-3.3-70b-versatile";
+const usingGroqJudge = () => !!process.env.GROQ_API_KEY;
+const judgeModel = () => (usingGroqJudge() ? groq(GROQ_JUDGE_MODEL_ID) : google(JUDGE_MODEL_ID));
+// Id recorded on the run row + shown in the admin panel.
+const judgeModelId = () => (usingGroqJudge() ? `groq:${GROQ_JUDGE_MODEL_ID}` : JUDGE_MODEL_ID);
 // Max active questions loaded into a single (legacy, ungrouped) run. Kept above
 // the current golden set (32) so a full run covers the whole set. Grouped runs
 // (the normal path) are bounded by GROUP_SIZE instead.
@@ -135,7 +147,7 @@ async function judgeAnswer(params: {
     : "(هیچ chunkای بازیابی نشد)";
 
   const { object } = await generateObject({
-    model: google(JUDGE_MODEL_ID),
+    model: judgeModel(),
     schema: judgeSchema,
     prompt: `تو داور کیفیت یک چت‌بات RAG فارسی هستی (دستیار سایت Nextra AI Consulting — مشاور هوش مصنوعی برای کسب‌وکارها).
 
@@ -483,7 +495,7 @@ export async function createEvalRun(
     .insert({
       status: "running",
       model: config.modelId,
-      judge_model: JUDGE_MODEL_ID,
+      judge_model: judgeModelId(),
       question_count: total,
       eval_group: group ?? null,
     })
@@ -538,7 +550,9 @@ export async function runEvaluation(runId: string): Promise<EvalRunProgress> {
       );
 
       const scores = await withRetry(async () => {
-        await paceFlash();
+        // Only pace against Google's RPM ceiling when the judge is on Gemini;
+        // on Groq it draws from a separate, much larger budget.
+        if (!usingGroqJudge()) await paceFlash();
         return judgeAnswer({ question: q, answer, chunks });
       }, "judge");
 
