@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
+import { loadEvaluationOverview } from "@/lib/chatbot/evaluate";
 import { PageTitle, StatCard, AdminTable, Badge, fa, faDate } from "@/components/admin/ui";
 import { RunEvalButton, SeedButton, AddQuestionForm } from "./eval-client";
 import { deleteQuestionAction, continueRunFormAction, markRunFailedAction } from "./actions";
@@ -55,16 +56,23 @@ export default async function EvaluationPage() {
   const tablesMissing = questionsRes.error !== null;
   const questions = questionsRes.data ?? [];
   const runs = runsRes.data ?? [];
-  const lastDone = runs.find((r) => r.status === "done");
-  const totals = (lastDone?.totals ?? {}) as Record<string, number>;
+
+  // Grouped, daily evaluation: health score is the combined result across the
+  // latest run of each group evaluated so far.
+  const overview = tablesMissing ? null : await loadEvaluationOverview().catch(() => null);
+  const totals = (overview?.aggregate ?? {}) as Record<string, number>;
+  const hasAggregate = overview?.aggregate != null;
 
   const up = feedbackUpRes.count ?? 0;
   const down = feedbackDownRes.count ?? 0;
   const satisfaction = up + down > 0 ? Math.round((up / (up + down)) * 100) : null;
 
-  const health = totals.health ?? null;
+  const health = hasAggregate ? (totals.health ?? null) : null;
   const healthStatus =
     health === null ? "—" : health >= 90 ? "🟢 خوب" : health >= 75 ? "🟡 نیازمند توجه" : "🔴 بحرانی";
+  const coverage = overview
+    ? `${fa(overview.groupsCovered)} از ${fa(overview.groupsTotal)} دسته سنجیده شده`
+    : "";
 
   return (
     <>
@@ -80,25 +88,32 @@ export default async function EvaluationPage() {
         </div>
       ) : null}
 
+      {overview && !overview.migrated ? (
+        <div className="card-surface mb-6 border-amber-400/40 bg-amber-500/5 p-5 text-sm">
+          برای ارزیابی دسته‌ای (روزانه)، فایل <code dir="ltr">supabase/admin5.sql</code> را در
+          Supabase SQL Editor اجرا کنید تا ستون گروه‌بندی اضافه شود.
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          label="امتیاز سلامت (آخرین اجرا)"
+          label="امتیاز سلامت (ترکیب دسته‌ها)"
           value={health === null ? "—" : `٪${fa(health)}`}
-          hint={healthStatus}
+          hint={coverage ? `${healthStatus} · ${coverage}` : healthStatus}
         />
         <StatCard
-          label="نتایج آخرین اجرا"
+          label="نتایج ترکیبی دسته‌ها"
           value={
-            lastDone
+            hasAggregate
               ? `${fa((totals.pass as number) ?? 0)}✓ ${fa((totals.warn as number) ?? 0)}⚠ ${fa((totals.fail as number) ?? 0)}✗`
               : "—"
           }
           hint={
-            lastDone
+            hasAggregate
               ? (totals.skipped ?? 0) > 0
                 ? `${fa(totals.skipped as number)} سنجیده‌نشده (محدودیت نرخ)`
-                : faDate(lastDone.started_at)
-              : "هنوز اجرایی ثبت نشده"
+                : `${fa((totals.scored as number) ?? 0)} سؤال سنجیده شد`
+              : "هنوز دسته‌ای ارزیابی نشده"
           }
         />
         <StatCard label="سؤالات آزمون" value={fa(questions.length)} />
@@ -109,9 +124,46 @@ export default async function EvaluationPage() {
         />
       </div>
 
+      {overview && overview.migrated ? (
+        <section className="card-surface mt-6 p-5">
+          <h2 className="mb-1 font-semibold">ارزیابی روزانه — هر روز یک دسته</h2>
+          <p className="mb-4 text-sm text-muted">
+            به‌خاطر محدودیت سهمیهٔ رایگان Gemini، مجموعهٔ آزمون به {fa(overview.groupsTotal)} دستهٔ
+            {" "}
+            {fa(overview.groupSize)}‌تایی تقسیم شده. هر روز یک دسته را اجرا کنید؛ امتیاز سلامت بالا،
+            ترکیب آخرین اجرای همهٔ دسته‌های سنجیده‌شده را نشان می‌دهد.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {overview.groups.map((g) => (
+              <div key={g.group} className="rounded-lg border border-border p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-medium">دستهٔ {fa(g.group)}</span>
+                  <span className="text-xs text-muted">{fa(g.questionCount)} سؤال</span>
+                </div>
+                {g.lastRun ? (
+                  <p className="mb-3 text-xs text-muted">
+                    آخرین اجرا: <span className="font-medium text-foreground">٪{fa(g.lastRun.health)}</span>
+                    {" · "}
+                    {faDate(g.lastRun.startedAt)}
+                    {g.lastRun.skipped > 0 ? ` · ${fa(g.lastRun.skipped)} سنجیده‌نشده` : ""}
+                  </p>
+                ) : (
+                  <p className="mb-3 text-xs text-amber-600">هنوز اجرا نشده</p>
+                )}
+                <RunEvalButton
+                  questionCount={g.questionCount}
+                  group={g.group}
+                  label={g.lastRun ? `↻ اجرای مجدد دستهٔ ${fa(g.group)}` : `▶ اجرای دستهٔ ${fa(g.group)}`}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="card-surface mt-6 p-5">
-        <h2 className="mb-2 font-semibold">جدول معیارها — آخرین اجرا</h2>
-        {lastDone ? (
+        <h2 className="mb-2 font-semibold">جدول معیارها — ترکیب دسته‌ها</h2>
+        {hasAggregate ? (
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-muted">
@@ -139,12 +191,9 @@ export default async function EvaluationPage() {
           </table>
         ) : (
           <p className="text-sm text-muted">
-            هنوز ارزیابی‌ای اجرا نشده است. سؤال‌ها را آماده کنید و «اجرای ارزیابی» را بزنید.
+            هنوز هیچ دسته‌ای ارزیابی نشده است. از بخش «ارزیابی روزانه» یک دسته را اجرا کنید.
           </p>
         )}
-        <div className="mt-4">
-          <RunEvalButton questionCount={questions.filter((q) => q.is_active).length} />
-        </div>
       </section>
 
       {runs.length > 0 ? (

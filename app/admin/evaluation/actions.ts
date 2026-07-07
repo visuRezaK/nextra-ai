@@ -16,13 +16,13 @@ export type StartEvalState =
 // background (after), and return the runId immediately. The client then polls
 // getRunStatusAction and calls continueEvaluationAction until the run is done,
 // so the browser never holds a multi-minute request (which was timing out).
-export async function startEvaluationAction(): Promise<StartEvalState> {
+export async function startEvaluationAction(group?: number): Promise<StartEvalState> {
   const { user } = await requireRole(["editor"]);
 
   let runId: string;
   let total: number;
   try {
-    ({ runId, total } = await createEvalRun());
+    ({ runId, total } = await createEvalRun(group ?? null));
   } catch (err) {
     console.error("startEvaluationAction error:", err);
     const message =
@@ -36,7 +36,7 @@ export async function startEvaluationAction(): Promise<StartEvalState> {
     try {
       const progress = await runEvaluation(runId);
       if (progress.complete) {
-        await logAudit({ actor: user, action: "eval.run", target: runId, meta: { total } });
+        await logAudit({ actor: user, action: "eval.run", target: runId, meta: { total, group: group ?? null } });
       }
     } catch (err) {
       console.error("eval background pass failed:", err);

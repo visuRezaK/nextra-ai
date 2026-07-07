@@ -26,10 +26,16 @@ import type { Locale } from "@/lib/i18n/config";
 // keeping both answer and judge on flash-lite lets more of the golden set score
 // before hitting the free cap.
 const JUDGE_MODEL_ID = "gemini-2.5-flash-lite";
-// Max active questions loaded into a single run. Kept above the current golden
-// set (32) so one run covers the whole set — otherwise questions past the limit
-// are ordered out and never scored. A run still spans several background passes.
+// Max active questions loaded into a single (legacy, ungrouped) run. Kept above
+// the current golden set (32) so a full run covers the whole set. Grouped runs
+// (the normal path) are bounded by GROUP_SIZE instead.
 const MAX_QUESTIONS_PER_RUN = 40;
+// The free Gemini tier can't score the whole golden set in one day, so the set
+// is split into daily GROUPS: every GROUP_SIZE active questions (ordered by
+// created_at) form one group, evaluated in its own run. 32 questions → 4 groups.
+// Grouping is DERIVED from question order, not stored per-question, so adding a
+// question just grows the last group.
+export const GROUP_SIZE = 8;
 // Sequential: the free Gemini tier rate-limits bursts, and each question makes
 // 3 calls (embed + answer + judge). One at a time, with retries, is reliable.
 const GAP_MS = 1500; // pause between questions to stay under the RPM ceiling
@@ -174,17 +180,45 @@ export interface EvalRunProgress {
   total: number; // active questions in the run
 }
 
-// Load the active golden set (same query used to size a run).
-async function loadActiveQuestions() {
+// Full active golden set, in the canonical order that defines the groups.
+async function loadAllActiveQuestions() {
   const supabase = getAdminClient();
   const { data, error } = await supabase
     .from("eval_questions")
     .select("id, question, category, expected, locale")
     .eq("is_active", true)
     .order("created_at", { ascending: true })
-    .limit(MAX_QUESTIONS_PER_RUN);
+    .limit(200);
   if (error) throw new Error(`eval questions load failed: ${error.message}`);
   return (data ?? []) as EvalQuestion[];
+}
+
+// Number of daily groups the active set splits into.
+export function groupCount(activeTotal: number): number {
+  return Math.max(1, Math.ceil(activeTotal / GROUP_SIZE));
+}
+
+// Questions to score for a run. `group` (1-based) slices the ordered active set
+// to that group's window; null/undefined means a legacy full run (all active,
+// capped). Same query is used to size a run and to resume it, so a run always
+// sees the same slice across passes (as long as the set isn't edited mid-run).
+async function loadActiveQuestions(group?: number | null) {
+  const all = await loadAllActiveQuestions();
+  if (!group) return all.slice(0, MAX_QUESTIONS_PER_RUN);
+  const start = (group - 1) * GROUP_SIZE;
+  return all.slice(start, start + GROUP_SIZE);
+}
+
+// Which group a run covered (null for a legacy full run, or if the column
+// predates admin5.sql).
+async function loadRunGroup(runId: string): Promise<number | null> {
+  const supabase = getAdminClient();
+  const { data } = await supabase
+    .from("eval_runs")
+    .select("eval_group")
+    .eq("id", runId)
+    .maybeSingle();
+  return (data?.eval_group ?? null) as number | null;
 }
 
 interface ResultRow {
@@ -253,6 +287,129 @@ function computeTotals(rows: ResultRow[]): EvalTotals {
   return totals;
 }
 
+// Combine several groups' totals into one aggregate. Each metric is a
+// scored-count-weighted mean of the per-group averages (so a group that scored
+// more questions counts proportionally more), and health is recomputed from the
+// combined metrics with the same weighting as a single run.
+function combineTotals(list: Record<string, number>[]): EvalTotals {
+  let scored = 0;
+  let skipped = 0;
+  let pass = 0;
+  let warn = 0;
+  let fail = 0;
+  const weighted: Record<string, number> = { faithfulness: 0, relevance: 0, tone: 0, retrieval: 0 };
+  for (const t of list) {
+    const s = Number(t.scored) || 0;
+    scored += s;
+    skipped += Number(t.skipped) || 0;
+    pass += Number(t.pass) || 0;
+    warn += Number(t.warn) || 0;
+    fail += Number(t.fail) || 0;
+    for (const k of Object.keys(weighted)) weighted[k] += (Number(t[k]) || 0) * s;
+  }
+  const n = Math.max(1, scored);
+  const faithfulness = Math.round(weighted.faithfulness / n);
+  const relevance = Math.round(weighted.relevance / n);
+  const tone = Math.round(weighted.tone / n);
+  const retrieval = Math.round(weighted.retrieval / n);
+  return {
+    faithfulness,
+    relevance,
+    tone,
+    retrieval,
+    pass,
+    warn,
+    fail,
+    scored,
+    skipped,
+    health: Math.round(faithfulness * 0.4 + relevance * 0.25 + tone * 0.15 + retrieval * 0.2),
+  };
+}
+
+export interface GroupSummary {
+  group: number; // 1-based
+  questionCount: number;
+  lastRun: { id: string; health: number; scored: number; skipped: number; startedAt: string } | null;
+}
+
+export interface EvaluationOverview {
+  migrated: boolean; // false until admin5.sql adds eval_runs.eval_group
+  groupSize: number;
+  groupsTotal: number;
+  groupsCovered: number; // groups with at least one done run
+  groups: GroupSummary[];
+  aggregate: EvalTotals | null; // combined health across covered groups (null if none)
+}
+
+// Everything the evaluation page needs to render the grouped, daily workflow:
+// the group breakdown (with each group's latest run) and the combined health
+// score across whichever groups have been evaluated so far.
+export async function loadEvaluationOverview(): Promise<EvaluationOverview> {
+  const supabase = getAdminClient();
+  const all = await loadAllActiveQuestions();
+  const groupsTotal = groupCount(all.length);
+
+  // Latest done run per group. Guarded so the page still renders before
+  // admin5.sql has added the eval_group column.
+  let migrated = true;
+  const latestByGroup = new Map<
+    number,
+    { id: string; totals: Record<string, number>; started_at: string }
+  >();
+  const { data, error } = await supabase
+    .from("eval_runs")
+    .select("id, eval_group, totals, started_at")
+    .eq("status", "done")
+    .not("eval_group", "is", null)
+    .order("started_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    migrated = false;
+  } else {
+    for (const r of data as {
+      id: string;
+      eval_group: number;
+      totals: Record<string, number>;
+      started_at: string;
+    }[]) {
+      if (!latestByGroup.has(r.eval_group)) {
+        latestByGroup.set(r.eval_group, { id: r.id, totals: r.totals ?? {}, started_at: r.started_at });
+      }
+    }
+  }
+
+  const groups: GroupSummary[] = [];
+  const coveredTotals: Record<string, number>[] = [];
+  for (let g = 1; g <= groupsTotal; g++) {
+    const start = (g - 1) * GROUP_SIZE;
+    const questionCount = all.slice(start, start + GROUP_SIZE).length;
+    const run = latestByGroup.get(g);
+    if (run) coveredTotals.push(run.totals);
+    groups.push({
+      group: g,
+      questionCount,
+      lastRun: run
+        ? {
+            id: run.id,
+            health: Number(run.totals?.health ?? 0),
+            scored: Number(run.totals?.scored ?? 0),
+            skipped: Number(run.totals?.skipped ?? 0),
+            startedAt: run.started_at,
+          }
+        : null,
+    });
+  }
+
+  return {
+    migrated,
+    groupSize: GROUP_SIZE,
+    groupsTotal,
+    groupsCovered: coveredTotals.length,
+    groups,
+    aggregate: coveredTotals.length > 0 ? combineTotals(coveredTotals) : null,
+  };
+}
+
 // If every active question now has a genuine result, compute totals from the
 // persisted rows (not in-memory, since a run spans several passes) and mark done.
 async function finalizeIfComplete(runId: string, total: number): Promise<boolean> {
@@ -273,7 +430,8 @@ async function finalizeIfComplete(runId: string, total: number): Promise<boolean
 // "running" forever and the health score reflects only what was actually judged.
 export async function forceFinalize(runId: string): Promise<EvalTotals> {
   const supabase = getAdminClient();
-  const questions = await loadActiveQuestions();
+  const group = await loadRunGroup(runId);
+  const questions = await loadActiveQuestions(group);
   const doneIds = await loadDoneIds(runId);
   const missing = questions.filter((q) => !doneIds.has(q.id));
 
@@ -303,11 +461,13 @@ export async function forceFinalize(runId: string): Promise<EvalTotals> {
 
 // Create an eval_runs row synchronously and return its id so the caller can
 // return it to the client immediately, then run the heavy loop in the background.
-export async function createEvalRun(): Promise<{ runId: string; total: number }> {
+export async function createEvalRun(
+  group?: number | null,
+): Promise<{ runId: string; total: number }> {
   const supabase = getAdminClient();
   const config = await getRuntimeChatConfig();
 
-  const list = await loadActiveQuestions();
+  const list = await loadActiveQuestions(group);
   const total = list.length;
   if (total === 0) throw new Error("no active questions");
 
@@ -318,6 +478,7 @@ export async function createEvalRun(): Promise<{ runId: string; total: number }>
       model: config.modelId,
       judge_model: JUDGE_MODEL_ID,
       question_count: total,
+      eval_group: group ?? null,
     })
     .select("id")
     .single();
@@ -333,7 +494,8 @@ export async function runEvaluation(runId: string): Promise<EvalRunProgress> {
   const supabase = getAdminClient();
   const config = await getRuntimeChatConfig();
 
-  const list = await loadActiveQuestions();
+  const group = await loadRunGroup(runId);
+  const list = await loadActiveQuestions(group);
   const total = list.length;
   if (total === 0) return { runId, complete: true, done: 0, total: 0 };
 

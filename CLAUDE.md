@@ -46,6 +46,8 @@ The chatbot widget (`components/chat/chat-widget.tsx`) is mounted in the locale 
 
 **Evaluation:** `lib/chatbot/evaluate.ts` powers the admin golden-set quality check (`/admin/evaluation`). For each active `eval_questions` row it runs the REAL pipeline (retrieve → generate) then an LLM judge scores faithfulness / relevance / tone / retrieval. The runner is a background (`after()`) job that is **time-bounded, resumable across passes, and rate-limit-paced** — read the tuning constants at the top of the file (`MAX_QUESTIONS_PER_RUN`, `MIN_FLASH_GAP_MS`, `TIME_BUDGET_MS`) before changing them. A full run of the 32-question set exceeds the Gemini free-tier daily quota; the golden set is seeded from `SEED_QUESTIONS` in `app/admin/evaluation/actions.ts` (keep it in sync with `nextra-chatbot-test-set.md`).
 
+Because the whole set can't be scored in one free-tier day, evaluation runs **in daily groups**: every `GROUP_SIZE` (8) active questions — ordered by `created_at` — form a group (32 → 4 groups), and each run scores exactly one group. Grouping is **derived from question order, not stored per question**; `eval_runs.eval_group` records which group a run covered (added by `supabase/admin5.sql`). The **امتیاز سلامت** on `/admin/evaluation` is `loadEvaluationOverview()`'s aggregate — it combines the *latest done run of each group* into one health score (scored-count-weighted metrics) and shows coverage like "۳ از ۴ دسته". Run one group per day until all are covered.
+
 ### Auth & Database
 Supabase handles auth (email/password + Google OAuth). Auth callback at `app/auth/callback/route.ts`. Server-side client at `lib/supabase/server.ts`, client-side at `lib/supabase/client.ts`.
 
@@ -55,7 +57,7 @@ Supabase tables used: `contacts` (leads from both booking form and chatbot), `ch
 Persian-only staff panel, separate from the public `/[locale]` site. Access is role-based on `profiles.role` (`admin` / `editor` / `operator` / `viewer`) via `lib/admin/auth.ts`. **Every page and server action must call `requireRole([...])` / `requireAdmin()` before using the service-role client** (`lib/chatbot/supabase-admin.ts`); the gates fail closed, and `admin` is always allowed. Sections cover leads, conversations, feedback, knowledge-base uploads, persona, model config, prompt playground, evaluation, Telegram, the embeddable widget, and users. Mutations are recorded with `logAudit()` (`lib/admin/audit.ts`).
 
 ### Database migrations
-Schema lives in `supabase/*.sql` (`schema.sql`, `chatbot.sql`, `admin.sql`, `admin2`–`admin4.sql`), applied **by hand in the Supabase SQL editor** — there is no migration tool. Files are idempotent and each admin phase adds one; a new table or feature does nothing (its pages/actions fail soft) until the corresponding SQL is run.
+Schema lives in `supabase/*.sql` (`schema.sql`, `chatbot.sql`, `admin.sql`, `admin2`–`admin5.sql`), applied **by hand in the Supabase SQL editor** — there is no migration tool. Files are idempotent and each admin phase adds one; a new table or feature does nothing (its pages/actions fail soft) until the corresponding SQL is run.
 
 ### Environment variables
 Key vars needed locally (pull via `vercel env pull`):

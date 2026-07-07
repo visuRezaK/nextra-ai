@@ -33,7 +33,15 @@ type Phase =
 // it, then polls status and — only when the run has gone quiet — auto-continues
 // until it's done, so the browser never holds a multi-minute request and passes
 // never overlap.
-export function RunEvalButton({ questionCount }: { questionCount: number }) {
+export function RunEvalButton({
+  questionCount,
+  group,
+  label,
+}: {
+  questionCount: number;
+  group?: number;
+  label?: string;
+}) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
@@ -127,7 +135,7 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
     busyRef.current = false;
     setPhase({ kind: "running", done: 0, total: questionCount });
 
-    const res = await startEvaluationAction();
+    const res = await startEvaluationAction(group);
     if (!res || !res.ok) {
       setPhase({ kind: "error", message: res?.error ?? "شروع ارزیابی ناموفق بود." });
       return;
@@ -136,7 +144,7 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
     setPhase({ kind: "running", done: 0, total: res.total });
     stop();
     timerRef.current = setInterval(poll, POLL_MS);
-  }, [poll, questionCount, stop]);
+  }, [group, poll, questionCount, stop]);
 
   const running = phase.kind === "running";
 
@@ -150,7 +158,7 @@ export function RunEvalButton({ questionCount }: { questionCount: number }) {
       >
         {running
           ? `در حال اجرا… ${fa(phase.done)} از ${fa(phase.total)} سنجیده شد`
-          : `▶ اجرای ارزیابی (${fa(questionCount)} سؤال فعال)`}
+          : (label ?? `▶ اجرای ارزیابی (${fa(questionCount)} سؤال فعال)`)}
       </button>
 
       {running ? (
