@@ -21,7 +21,9 @@ export type VoiceDict = {
 // layout, next to ChatWidget's bottom-left FAB — this one sits at left-24 so
 // the two never overlap; Telegram/ScrollToTop own the right edge). Talks to a
 // public ElevenLabs agent, so no API key is needed client-side. Renders
-// nothing until NEXT_PUBLIC_ELEVENLABS_AGENT_ID is configured.
+// nothing until NEXT_PUBLIC_ELEVENLABS_AGENT_ID is configured — note the env
+// var is inlined into this module at BUILD time, so changing it on Vercel
+// requires a rebuild of this file (a cached-build redeploy is not enough).
 // `locale` is accepted for parity with ChatWidget (future per-locale agents).
 export function VoiceWidget({
   dict,
