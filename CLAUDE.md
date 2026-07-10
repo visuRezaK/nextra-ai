@@ -48,6 +48,9 @@ The chatbot widget (`components/chat/chat-widget.tsx`) is mounted in the locale 
 
 Because the whole set can't be scored in one free-tier day, evaluation runs **in daily groups**: every `GROUP_SIZE` (8) active questions — ordered by `created_at` — form a group (32 → 4 groups), and each run scores exactly one group. Grouping is **derived from question order, not stored per question**; `eval_runs.eval_group` records which group a run covered (added by `supabase/admin5.sql`). The **امتیاز سلامت** on `/admin/evaluation` is `loadEvaluationOverview()`'s aggregate — it combines the *best done run of each group* (the one that scored the **most** questions, newest as tiebreak, so a rate-limited partial re-run can't clobber a fuller previous run) into one health score (scored-count-weighted metrics) and shows coverage like "۳ از ۴ دسته". Run one group per day until all are covered.
 
+### Voice agent (ElevenLabs)
+A Persian voice agent runs on **ElevenLabs Agents** (agent + voice + LLM configured in their dashboard; system prompt source of truth: `brand/voice-agent-prompt.md`, including the webhook-tool specs). Site side: `components/voice/voice-widget.tsx` (custom FAB at bottom-left `left-24`, `@elevenlabs/react`, public agent — renders nothing without `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`) plus two webhook-tool endpoints guarded by the `x-voice-tool-secret` header (`ELEVENLABS_TOOL_SECRET`): `/api/voice/lead` (writes `contacts` with `source: "voice"` + notifyLead email) and `/api/voice/knowledge` (same RAG `retrieve()` as the chatbot, so a KB re-ingest updates both assistants). Tool JSON responses are read back to the agent's LLM — keep their `message`/`knowledge` fields Persian and speakable.
+
 ### Auth & Database
 Supabase handles auth (email/password + Google OAuth). Auth callback at `app/auth/callback/route.ts`. Server-side client at `lib/supabase/server.ts`, client-side at `lib/supabase/client.ts`.
 
@@ -67,6 +70,8 @@ Key vars needed locally (pull via `vercel env pull`):
 - `INGEST_SECRET` — guards `/api/admin/ingest`
 - `GROQ_API_KEY` — *optional*; when set, the eval **judge** runs on Groq's free tier instead of Gemini (halves Gemini calls per eval question). `GROQ_JUDGE_MODEL` overrides the judge model id
 - `RESEND_API_KEY` / `LEAD_NOTIFY_EMAIL` — lead email alerts (optional)
+- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` — ElevenLabs voice agent id (build-time; widget hidden when unset)
+- `ELEVENLABS_TOOL_SECRET` — guards the `/api/voice/*` webhook-tool endpoints
 - `NEXT_PUBLIC_SITE_URL` — canonical URL for OG tags
 
 ### Deployment
