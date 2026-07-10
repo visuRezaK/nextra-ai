@@ -13,6 +13,8 @@
     "@ai-sdk/google": "^3.0.83",
     "@ai-sdk/groq": "^3.0.48",
     "@ai-sdk/react": "^3.0.211",
+    "@elevenlabs/client": "^1.14.1",
+    "@elevenlabs/react": "^1.9.1",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.1",
     "@tsparticles/react": "^4.2.0",

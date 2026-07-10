@@ -176,8 +176,12 @@ export default async function AdminDashboardPage() {
               <li key={l.id} className="flex items-center justify-between py-2">
                 <span>{l.name}</span>
                 <span className="flex items-center gap-2">
-                  <Badge tone={l.source === "chatbot" ? "accent" : "neutral"}>
-                    {l.source === "chatbot" ? "چت‌بات" : "فرم سایت"}
+                  <Badge tone={l.source === "web" ? "neutral" : "accent"}>
+                    {l.source === "chatbot"
+                      ? "چت‌بات"
+                      : l.source === "voice"
+                        ? "دستیار صوتی"
+                        : "فرم سایت"}
                   </Badge>
                   <span className="text-muted">{faDate(l.created_at)}</span>
                 </span>

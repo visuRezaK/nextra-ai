@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(2000);
 
-  if (source === "web" || source === "chatbot") query = query.eq("source", source);
+  if (source === "web" || source === "chatbot" || source === "voice")
+    query = query.eq("source", source);
   const term = q ? sanitizeQuery(q) : "";
   if (term) {
     query = query.or(

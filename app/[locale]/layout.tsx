@@ -7,6 +7,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { TelegramButton } from "@/components/ui/telegram-button";
 import { ChatWidget } from "@/components/chat/chat-widget";
+import { VoiceWidget } from "@/components/voice/voice-widget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -79,6 +80,7 @@ export default async function LocaleLayout({
         <ScrollToTop />
         <TelegramButton />
         <ChatWidget locale={locale as Locale} dict={dict.chat} />
+        <VoiceWidget locale={locale as Locale} dict={dict.voice} />
       </body>
     </html>
   );

@@ -67,7 +67,8 @@ export async function notifyLead(lead: LeadNotification): Promise<void> {
   if (!apiKey || !to) return; // not configured -> silently skip
 
   const from = process.env.LEAD_NOTIFY_FROM ?? "Nextra AI Consulting <onboarding@resend.dev>";
-  const sourceLabel = lead.source === "chatbot" ? "چت‌بات" : "سایت";
+  const sourceLabel =
+    lead.source === "chatbot" ? "چت‌بات" : lead.source === "voice" ? "دستیار صوتی" : "سایت";
 
   const body = [
     `نام: ${lead.name}`,

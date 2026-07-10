@@ -25,7 +25,8 @@ export default async function LeadsPage({
     .order("created_at", { ascending: false })
     .limit(200);
 
-  if (source === "web" || source === "chatbot") query = query.eq("source", source);
+  if (source === "web" || source === "chatbot" || source === "voice")
+    query = query.eq("source", source);
   const term = q ? sanitizeQuery(q) : "";
   if (term) {
     query = query.or(
@@ -62,6 +63,7 @@ export default async function LeadsPage({
             <option value="">همه منابع</option>
             <option value="web">فرم سایت</option>
             <option value="chatbot">چت‌بات</option>
+            <option value="voice">دستیار صوتی</option>
           </select>
           <button
             type="submit"
@@ -91,8 +93,12 @@ export default async function LeadsPage({
               <span className="line-clamp-2">{l.message ?? "—"}</span>
             </td>
             <td className="px-4 py-3">
-              <Badge tone={l.source === "chatbot" ? "accent" : "neutral"}>
-                {l.source === "chatbot" ? "چت‌بات" : "فرم سایت"}
+              <Badge tone={l.source === "web" ? "neutral" : "accent"}>
+                {l.source === "chatbot"
+                  ? "چت‌بات"
+                  : l.source === "voice"
+                    ? "دستیار صوتی"
+                    : "فرم سایت"}
               </Badge>
             </td>
             <td className="px-4 py-3 text-muted">{faDate(l.created_at)}</td>

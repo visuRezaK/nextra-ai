@@ -38,6 +38,17 @@
     "widgetOpen": "AI Assistant",
     "widgetClose": "Close chat"
   },
+  "voice": {
+    "open": "Voice call with the AI assistant",
+    "close": "Close voice call",
+    "connecting": "Connecting…",
+    "listening": "Listening…",
+    "speaking": "Assistant is speaking…",
+    "endCall": "End call",
+    "micDenied": "Microphone access is needed for the voice call.",
+    "error": "Connection failed. Please try again.",
+    "poweredBy": "Powered by ElevenLabs"
+  },
   "hero": {
     "badge": "From network engineer to AI consultant",
     "headline": "AI — the answer to your business needs",
