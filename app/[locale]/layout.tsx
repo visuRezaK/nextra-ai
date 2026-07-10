@@ -80,7 +80,11 @@ export default async function LocaleLayout({
         <ScrollToTop />
         <TelegramButton />
         <ChatWidget locale={locale as Locale} dict={dict.chat} />
-        <VoiceWidget locale={locale as Locale} dict={dict.voice} />
+        <VoiceWidget
+          locale={locale as Locale}
+          dict={dict.voice}
+          agentId={process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID}
+        />
       </body>
     </html>
   );

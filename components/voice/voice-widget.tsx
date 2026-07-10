@@ -20,19 +20,21 @@ export type VoiceDict = {
 // Floating voice-call button shown on every site page (mounted in the locale
 // layout, next to ChatWidget's bottom-left FAB — this one sits at left-24 so
 // the two never overlap; Telegram/ScrollToTop own the right edge). Talks to a
-// public ElevenLabs agent, so no API key is needed client-side. Renders
-// nothing until NEXT_PUBLIC_ELEVENLABS_AGENT_ID is configured — note the env
-// var is inlined into this module at BUILD time, so changing it on Vercel
-// requires a rebuild of this file (a cached-build redeploy is not enough).
+// public ElevenLabs agent, so no API key is needed client-side. The agent id
+// is passed as a prop from the server layout rather than read from
+// process.env here: build-time NEXT_PUBLIC inlining doesn't reach this chunk
+// on Vercel, and the server-provided prop survives env changes without a
+// rebuild. Renders nothing while the id is unset.
 // `locale` is accepted for parity with ChatWidget (future per-locale agents).
 export function VoiceWidget({
+  agentId,
   dict,
 }: {
+  agentId?: string;
   locale: Locale;
   dict: VoiceDict;
 }) {
   const pathname = usePathname();
-  const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
 
   // Same rule as ChatWidget: keep the full-page assistant uncluttered.
   if (!agentId || pathname?.replace(/\/$/, "").endsWith("/chat")) return null;
