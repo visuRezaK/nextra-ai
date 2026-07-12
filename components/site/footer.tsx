@@ -48,6 +48,11 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
                 {dict.nav.book}
               </Link>
             </li>
+            <li>
+              <Link href="/card" className="hover:text-foreground">
+                {dict.footer.card}
+              </Link>
+            </li>
           </ul>
         </div>
 
