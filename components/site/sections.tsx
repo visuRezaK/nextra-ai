@@ -43,7 +43,7 @@ const PROBLEM_ICONS = [
 
 export function Problem({ dict }: Props) {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-12 md:py-20">
+    <section className="mx-auto max-w-6xl px-5 py-12 md:py-14">
       <SectionHeading eyebrow={dict.problem.eyebrow} title={dict.problem.title} subtitle={dict.problem.subtitle} />
       <div className="mt-12 grid gap-5 sm:grid-cols-3">
         {dict.problem.items.map((item, i) => {
@@ -65,7 +65,7 @@ export function Problem({ dict }: Props) {
 
 export function Transform({ dict }: Props) {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-12 md:py-20">
+    <section className="mx-auto max-w-6xl px-5 py-12 md:py-14">
       <SectionHeading eyebrow={dict.transform.eyebrow} title={dict.transform.title} subtitle={dict.transform.subtitle} />
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
         {/* BEFORE */}
@@ -108,7 +108,7 @@ export function Hero({ dict, locale }: Props) {
       {/* Screen 1 — split hero (owner photo + intro + consultation CTA).
           Photo is a placeholder until the owner's image is added. */}
       <section className="bg-grid relative flex min-h-screen items-center overflow-hidden">
-        <div className="mx-auto w-full max-w-6xl px-5 py-14 md:py-24">
+        <div className="mx-auto w-full max-w-6xl px-5 py-14 md:py-16">
           <div className="grid items-center gap-10 rounded-[2.5rem] border border-border/60 bg-surface-2/40 p-8 shadow-[0_30px_80px_-40px_rgba(14,165,233,0.35)] sm:p-12 lg:grid-cols-2 lg:gap-14">
             {/* Text column */}
             <div className="text-center lg:text-start">
@@ -165,7 +165,7 @@ export function Hero({ dict, locale }: Props) {
 
       {/* Screen 2 — AI question hook */}
       <section className="bg-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
-        <div className="mx-auto max-w-3xl px-5 py-14 md:py-24 text-center">
+        <div className="mx-auto max-w-3xl px-5 py-14 md:py-16 text-center">
           {/* Robot image removed for now — using the rotating image ring instead */}
           <ImageRing images={HERO_CAROUSEL_IMAGES} />
           <h2 className="mt-28 text-4xl font-black leading-tight tracking-tight sm:mt-6 sm:text-6xl">
@@ -191,7 +191,7 @@ export function Hero({ dict, locale }: Props) {
 export function Services({ dict }: Props) {
   return (
     <section id="services" className="bg-grid relative scroll-mt-20 overflow-hidden">
-      <div className="mx-auto max-w-6xl px-5 py-12 md:py-20">
+      <div className="mx-auto max-w-6xl px-5 py-12 md:py-14">
         <SectionHeading
           eyebrow={dict.services.eyebrow}
           title={dict.services.title}
@@ -265,7 +265,7 @@ export function Featured({ dict, locale }: Props) {
 
 export function Why({ dict }: Props) {
   return (
-    <section id="why" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-20">
+    <section id="why" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-14">
       <SectionHeading title={dict.why.title} subtitle={dict.why.subtitle} />
       <div className="mt-12 grid gap-5 sm:grid-cols-2">
         {dict.why.items.map((item, i) => (
@@ -286,7 +286,7 @@ export function Why({ dict }: Props) {
 
 export function About({ dict }: Props) {
   return (
-    <section id="about" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-20">
+    <section id="about" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-14">
       <div className="card-surface grid gap-8 overflow-hidden p-8 sm:p-12 lg:grid-cols-[1fr_1.4fr]">
         <div className="flex aspect-square items-center justify-center rounded-2xl border border-dashed border-border bg-surface-2 text-center">
           <span className="px-6 text-sm text-muted">{dict.about.placeholder}</span>
@@ -327,7 +327,7 @@ export function Audience({ dict }: Props) {
 
 export function Faq({ dict }: Props) {
   return (
-    <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-5 py-12 md:py-20">
+    <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-5 py-12 md:py-14">
       <SectionHeading title={dict.faq.title} subtitle={dict.faq.subtitle} />
       <div className="mt-10 space-y-3">
         {dict.faq.items.map((item) => (
