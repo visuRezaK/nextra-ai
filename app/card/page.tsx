@@ -78,7 +78,7 @@ export default async function CardPage() {
         {/* Card */}
         <div className="card-surface glow-accent overflow-hidden">
           {/* Header band */}
-          <div className="surface-ink relative px-6 pb-14 pt-8 text-center">
+          <div className="surface-ink relative px-6 py-5 text-center">
             <div className="mx-auto flex items-center justify-center gap-2" dir="ltr">
               <Logo className="h-7 w-7" />
               <span className="text-sm font-bold tracking-wide text-white">Nextra AI</span>
@@ -88,8 +88,8 @@ export default async function CardPage() {
             </div>
           </div>
 
-          {/* Photo overlapping the band */}
-          <div className="-mt-12 flex justify-center">
+          {/* Photo below the band, on the light surface */}
+          <div className="mt-6 flex justify-center">
             <Image
               src="/images/profile-reza.jpeg"
               alt={CONTACT.nameFa}
