@@ -51,8 +51,13 @@
   --radius-lg: var(--radius);
 }
 
-* {
-  border-color: var(--border);
+/* Default border color. Must live in @layer base — unlayered rules outrank
+   Tailwind's @layer utilities, which silently killed every border-color
+   utility (border-accent/30, border-sky-200, …) site-wide. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 html {
@@ -135,7 +140,7 @@ html[lang="fa"] body {
   }
 }
 
-/* Animated wave divider on top of the site footer.
+/* Animated wave divider above the site footer.
    Each .wave-track svg is 200% wide and holds an even number of wave periods,
    so translateX(-50%) loops seamlessly. Two layers at different speeds give
    the water-like drift. */
