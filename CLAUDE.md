@@ -49,7 +49,15 @@ The chatbot widget (`components/chat/chat-widget.tsx`) is mounted in the locale 
 Because the whole set can't be scored in one free-tier day, evaluation runs **in daily groups**: every `GROUP_SIZE` (8) active questions — ordered by `created_at` — form a group (32 → 4 groups), and each run scores exactly one group. Grouping is **derived from question order, not stored per question**; `eval_runs.eval_group` records which group a run covered (added by `supabase/admin5.sql`). The **امتیاز سلامت** on `/admin/evaluation` is `loadEvaluationOverview()`'s aggregate — it combines the *best done run of each group* (the one that scored the **most** questions, newest as tiebreak, so a rate-limited partial re-run can't clobber a fuller previous run) into one health score (scored-count-weighted metrics) and shows coverage like "۳ از ۴ دسته". Run one group per day until all are covered.
 
 ### Voice agent (ElevenLabs)
-A Persian voice agent runs on **ElevenLabs Agents** (agent + voice + LLM configured in their dashboard; system prompt source of truth: `brand/voice-agent-prompt.md`, including the webhook-tool specs). Site side: `components/voice/voice-widget.tsx` (custom FAB at bottom-left `left-24`, `@elevenlabs/react`, public agent — renders nothing without `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`) plus two webhook-tool endpoints guarded by the `x-voice-tool-secret` header (`ELEVENLABS_TOOL_SECRET`): `/api/voice/lead` (writes `contacts` with `source: "voice"` + notifyLead email) and `/api/voice/knowledge` (same RAG `retrieve()` as the chatbot, so a KB re-ingest updates both assistants). Tool JSON responses are read back to the agent's LLM — keep their `message`/`knowledge` fields Persian and speakable.
+A Persian voice agent runs on **ElevenLabs Agents** (agent + voice + LLM configured in their dashboard; system prompt source of truth: `brand/voice-agent-prompt.md`, including the webhook-tool specs). Site side: `components/voice/voice-widget.tsx` (custom FAB at bottom-left `left-24`, `@elevenlabs/react`, public agent) plus two webhook-tool endpoints guarded by the `x-voice-tool-secret` header (`ELEVENLABS_TOOL_SECRET`): `/api/voice/lead` (writes `contacts` with `source: "voice"` + notifyLead email) and `/api/voice/knowledge` (same RAG `retrieve()` as the chatbot, so a KB re-ingest updates both assistants). Tool JSON responses are read back to the agent's LLM — keep their `message`/`knowledge` fields Persian and speakable.
+
+The agent id is **not** read from `process.env` inside the widget: build-time `NEXT_PUBLIC_*` inlining does not reach that client chunk on Vercel/Turbopack, so `app/[locale]/layout.tsx` reads `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` at server runtime and passes it as the `agentId` prop (widget renders nothing when it's unset). Keep it that way — do not "simplify" back to env access in the client component.
+
+ElevenLabs dashboard gotchas (learned the hard way, 2026-07):
+- Agent config edits live on a **branch** ("Main") and do nothing until **Publish** is clicked. Tool definitions, however, are workspace-level and apply immediately without Publish.
+- A failing webhook tool that dies in ~30ms with an opaque «Error 500» never left ElevenLabs. The real cause is in the conversation view → tool details → the collapsed **Error message** row (a Go `net/http` error). Past culprits: a leading space in the header *name*, and a typo in a hand-typed URL — always paste URLs/header names.
+- Settings → Security: allowlist contains the prod hostname (their validator rejects `localhost`). **«Fail when Origin header is missing» must stay OFF** — turning it on makes the site widget hang at "connecting".
+- Text-mode Preview in the dashboard fires real tool calls and is far cheaper than voice calls for testing (free tier ≈ 15 min/month of credits).
 
 ### Auth & Database
 Supabase handles auth (email/password + Google OAuth). Auth callback at `app/auth/callback/route.ts`. Server-side client at `lib/supabase/server.ts`, client-side at `lib/supabase/client.ts`.
@@ -70,12 +78,17 @@ Key vars needed locally (pull via `vercel env pull`):
 - `INGEST_SECRET` — guards `/api/admin/ingest`
 - `GROQ_API_KEY` — *optional*; when set, the eval **judge** runs on Groq's free tier instead of Gemini (halves Gemini calls per eval question). `GROQ_JUDGE_MODEL` overrides the judge model id
 - `RESEND_API_KEY` / `LEAD_NOTIFY_EMAIL` — lead email alerts (optional)
-- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` — ElevenLabs voice agent id (build-time; widget hidden when unset)
+- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` — ElevenLabs voice agent id (read at server runtime in the locale layout and passed as a prop; widget hidden when unset)
 - `ELEVENLABS_TOOL_SECRET` — guards the `/api/voice/*` webhook-tool endpoints
 - `NEXT_PUBLIC_SITE_URL` — canonical URL for OG tags
 
 ### Deployment
 Hosted on Vercel (project `nextra-ai`, primary domain `nextra-ai-consulting.vercel.app`). `NEXT_PUBLIC_SITE_URL` is read at **build time** for OG/canonical tags — changing it in Vercel requires a redeploy (`vercel --prod`) before the new value takes effect.
+
+Vercel env-var gotchas (the CLI is used via `npx -y vercel`):
+- **Any** env-var change needs a redeploy — runtime env is frozen per deployment (`npx vercel redeploy <deployment-url>` is enough; no rebuild of code required).
+- Add values from **Bash** (`printf 'value' | npx vercel env add NAME production`), never a PowerShell pipe — PowerShell prepends a UTF-16 BOM that silently corrupts the stored value (shows up as `﻿` at the start).
+- Don't trust "I added it in the dashboard" — verify with `npx vercel env ls production`.
 
 ### Styling
 Tailwind CSS v4 (PostCSS plugin, no `tailwind.config`). Design tokens are CSS variables — see `app/globals.css`. RTL layout is handled via `dir="rtl"` on `<html>` for Persian. Fonts: Inter (Latin) + Vazirmatn (Arabic/Persian), both as CSS variables (`--font-inter`, `--font-vazir`).
