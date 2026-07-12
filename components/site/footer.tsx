@@ -24,8 +24,8 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
           viewBox="0 0 2880 100"
           preserveAspectRatio="none"
         >
-          <path d={wavePath} fill="rgba(14, 165, 233, 0.12)" transform="translate(-180 -8)" />
-          <path d={wavePath} fill="rgba(14, 165, 233, 0.12)" transform="translate(2700 -8)" />
+          <path d={wavePath} fill="rgba(14, 165, 233, 0.28)" transform="translate(-180 -8)" />
+          <path d={wavePath} fill="rgba(14, 165, 233, 0.28)" transform="translate(2700 -8)" />
         </svg>
         <svg
           className="wave-track absolute bottom-0 left-0 h-full w-[200%]"
