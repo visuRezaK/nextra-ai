@@ -107,8 +107,8 @@ export function Hero({ dict, locale }: Props) {
     <>
       {/* Screen 1 — split hero (owner photo + intro + consultation CTA).
           Photo is a placeholder until the owner's image is added. */}
-      <section className="bg-grid relative flex min-h-screen items-center overflow-hidden">
-        <div className="mx-auto w-full max-w-6xl px-5 py-14 md:py-16">
+      <section className="bg-grid relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden">
+        <div className="mx-auto w-full max-w-6xl px-5 py-8 md:py-10">
           <div className="grid items-center gap-10 rounded-[2.5rem] border border-border/60 bg-surface-2/40 p-8 shadow-[0_30px_80px_-40px_rgba(14,165,233,0.35)] sm:p-12 lg:grid-cols-2 lg:gap-14">
             {/* Text column */}
             <div className="text-center lg:text-start">
