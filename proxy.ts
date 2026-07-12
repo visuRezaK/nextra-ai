@@ -37,7 +37,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip Next internals, API routes, auth callback, embed iframe page, and files with an extension.
+  // Skip Next internals, API routes, auth callback, embed iframe page, the
+  // digital business card (/card, locale-less like /embed), and files with an extension.
   // Note: /admin IS matched on purpose — its branch above refreshes the session without locale redirects.
-  matcher: ["/((?!_next|api|auth|embed|.*\\..*).*)"],
+  matcher: ["/((?!_next|api|auth|embed|card|.*\\..*).*)"],
 };
