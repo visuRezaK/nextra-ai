@@ -135,6 +135,26 @@ html[lang="fa"] body {
   }
 }
 
+/* Animated wave divider on top of the site footer.
+   Each .wave-track svg is 200% wide and holds an even number of wave periods,
+   so translateX(-50%) loops seamlessly. Two layers at different speeds give
+   the water-like drift. */
+@keyframes wave-drift {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.wave-track {
+  animation: wave-drift 16s linear infinite;
+  will-change: transform;
+}
+
+.wave-track--back {
+  animation-duration: 26s;
+  animation-direction: reverse;
+}
+
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   html {
