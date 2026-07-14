@@ -140,6 +140,42 @@ html[lang="fa"] body {
   }
 }
 
+/* Hero entrance: elements rise in one after another on page load. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-rise {
+  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-rise--2 { animation-delay: 0.12s; }
+.anim-rise--3 { animation-delay: 0.24s; }
+.anim-rise--4 { animation-delay: 0.36s; }
+.anim-rise--5 { animation-delay: 0.48s; }
+
+/* Gentle idle float for the hero photo (applied to an inner wrapper so it
+   doesn't fight the rise-in transform on the outer one). */
+@keyframes float-soft {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+.anim-float {
+  animation: float-soft 3.5s ease-in-out infinite alternate;
+}
+
 /* Animated wave divider above the site footer.
    Each .wave-track svg is 200% wide and holds an even number of wave periods,
    so translateX(-50%) loops seamlessly. Two layers at different speeds give

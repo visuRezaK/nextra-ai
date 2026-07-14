@@ -112,15 +112,15 @@ export function Hero({ dict, locale }: Props) {
           <div className="grid items-center gap-10 rounded-[2.5rem] border-2 border-accent/30 bg-surface-2/40 p-8 shadow-[0_30px_80px_-40px_rgba(14,165,233,0.35)] sm:p-12 lg:grid-cols-2 lg:gap-14">
             {/* Text column */}
             <div className="text-center lg:text-start">
-              <p className="text-base font-bold text-accent sm:text-lg">{sh.team}</p>
-              <h1 className="mt-3 text-3xl font-black leading-tight tracking-tight text-accent sm:text-5xl">
+              <p className="anim-rise text-base font-bold text-accent sm:text-lg">{sh.team}</p>
+              <h1 className="anim-rise anim-rise--2 mt-3 text-3xl font-black leading-tight tracking-tight text-accent sm:text-5xl">
                 {sh.headingAccent}
               </h1>
-              <h2 className="mt-3 text-2xl font-black leading-tight tracking-tight sm:text-4xl">
+              <h2 className="anim-rise anim-rise--3 mt-3 text-2xl font-black leading-tight tracking-tight sm:text-4xl">
                 {sh.heading}
               </h2>
-              <p className="mt-5 text-lg font-medium text-muted sm:text-xl">{sh.tagline}</p>
-              <ul className="mx-auto mt-6 max-w-xl space-y-3 text-start lg:mx-0">
+              <p className="anim-rise anim-rise--4 mt-5 text-lg font-medium text-muted sm:text-xl">{sh.tagline}</p>
+              <ul className="anim-rise anim-rise--5 mx-auto mt-6 max-w-xl space-y-3 text-start lg:mx-0">
                 {sh.points.map((point) => (
                   <li
                     key={point}
@@ -133,8 +133,8 @@ export function Hero({ dict, locale }: Props) {
               </ul>
             </div>
             {/* Image column — owner photo */}
-            <div className="order-first lg:order-none">
-              <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl">
+            <div className="anim-rise anim-rise--2 order-first lg:order-none">
+              <div className="anim-float relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl">
                 <Image
                   src="/images/profile-reza.jpeg"
                   alt="رضا کتانچی — مشاور هوش مصنوعی"
