@@ -6,10 +6,15 @@ export function fa(n: number): string {
   return n.toLocaleString("fa-IR");
 }
 
+// Gregorian (میلادی) calendar in Toronto local time, with Persian digits to
+// match the rest of the panel. `-u-ca-gregory` forces the Gregorian calendar
+// (plain "fa-IR" defaults to the Persian/Jalali calendar); timeZone anchors it
+// to Toronto instead of the server's UTC.
 export function faDate(iso: string): string {
-  return new Date(iso).toLocaleString("fa-IR", {
+  return new Date(iso).toLocaleString("fa-IR-u-ca-gregory", {
     dateStyle: "short",
     timeStyle: "short",
+    timeZone: "America/Toronto",
   });
 }
 
