@@ -69,7 +69,7 @@ export function Transform({ dict }: Props) {
       <SectionHeading eyebrow={dict.transform.eyebrow} title={dict.transform.title} subtitle={dict.transform.subtitle} />
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
         {/* BEFORE */}
-        <div className="rounded-2xl border border-border bg-surface-2/50 p-6 sm:p-8">
+        <div className="rounded-2xl border-2 border-accent/30 bg-surface-2/50 p-6 sm:p-8">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted">
             {dict.transform.beforeLabel}
           </span>
@@ -83,7 +83,7 @@ export function Transform({ dict }: Props) {
           </ul>
         </div>
         {/* AFTER */}
-        <div className="glow-accent rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/10 via-surface to-background p-6 sm:p-8">
+        <div className="glow-accent rounded-2xl border-2 border-accent/30 bg-gradient-to-br from-accent/10 via-surface to-background p-6 sm:p-8">
           <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
             {dict.transform.afterLabel}
           </span>
@@ -248,7 +248,7 @@ export function Featured({ dict, locale }: Props) {
             </ul>
           </div>
 
-          <div className="flex flex-col items-center rounded-2xl border border-border bg-surface-2 p-8 text-center">
+          <div className="flex flex-col items-center rounded-2xl border-2 border-accent/30 bg-surface-2 p-8 text-center">
             <div className="flex items-end justify-center gap-1">
               <span className="text-5xl font-black text-foreground">{dict.featured.price}</span>
               <span className="pb-2 text-sm text-muted">{dict.featured.priceUnit}</span>

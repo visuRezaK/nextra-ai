@@ -96,10 +96,10 @@ html[lang="fa"] body {
   color: transparent;
 }
 
-/* Reusable card surface */
+/* Reusable card surface — prominent accent-tinted border to match the hero card */
 .card-surface {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid rgba(14, 165, 233, 0.3);
   border-radius: var(--radius);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -16px rgba(15, 23, 42, 0.12);
 }
