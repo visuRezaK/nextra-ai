@@ -176,10 +176,10 @@ export function Hero({ dict, locale }: Props) {
           <p className="mx-auto mt-8 max-w-2xl text-xl font-medium leading-relaxed text-muted sm:text-2xl">
             {dict.aiQuestion.answer}
           </p>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted/70">
+          <p className="mx-auto mt-8 max-w-2xl rounded-3xl bg-indigo-500/[0.06] px-8 py-7 text-lg font-semibold leading-relaxed text-foreground/90 sm:text-xl">
             {dict.aiQuestion.sub}
           </p>
-          <p className="mx-auto mt-10 max-w-2xl rounded-3xl bg-indigo-500/[0.06] px-8 py-7 text-lg font-semibold leading-relaxed text-foreground/90 sm:text-xl">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted/70">
             {dict.aiQuestion.quote}
           </p>
         </div>
