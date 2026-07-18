@@ -50,7 +50,8 @@ export function TestSearch() {
                 <div className="mb-1 flex items-center justify-between">
                   <span className="font-medium">{r.title || r.category}</span>
                   <span className="text-xs text-muted" dir="ltr">
-                    ٪{Math.round(r.similarity * 100).toLocaleString("fa-IR")} · {r.category}
+                    {Math.round(r.similarity * 100).toLocaleString("fa-IR-u-nu-latn")}% ·{" "}
+                    {r.category}
                   </span>
                 </div>
                 <p className="line-clamp-3 leading-6 text-foreground/70">{r.content}</p>

@@ -475,7 +475,7 @@ export async function forceFinalize(runId: string): Promise<EvalTotals> {
 
   const totals = computeTotals(await loadResults(runId));
   // If nothing could be scored (quota fully exhausted), the run is a measurement
-  // FAILURE, not a ٪0 result — mark it failed so it isn't shown as a health score.
+  // FAILURE, not a 0% result — mark it failed so it isn't shown as a health score.
   const status = totals.scored > 0 ? "done" : "failed";
   await supabase
     .from("eval_runs")

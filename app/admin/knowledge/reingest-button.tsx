@@ -23,7 +23,7 @@ export function ReingestButton() {
         <span className="text-sm text-emerald-600">
           انجام شد:{" "}
           {state.summary
-            .map((s) => `${s.locale} = ${s.count.toLocaleString("fa-IR")}`)
+            .map((s) => `${s.locale} = ${s.count.toLocaleString("fa-IR-u-nu-latn")}`)
             .join("، ")}
         </span>
       ) : null}

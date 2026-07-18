@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const fa = (n: number) => n.toLocaleString("fa-IR");
+const fa = (n: number) => n.toLocaleString("fa-IR-u-nu-latn");
 
 // Upload a PDF/DOCX/TXT/MD file or a URL into the knowledge base.
 export function UploadForm() {

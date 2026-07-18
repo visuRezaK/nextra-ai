@@ -12,7 +12,7 @@ import {
   type QuestionState,
 } from "./actions";
 
-const fa = (n: number) => n.toLocaleString("fa-IR");
+const fa = (n: number) => n.toLocaleString("fa-IR-u-nu-latn");
 
 const POLL_MS = 5000;
 // Only continue once the run has been QUIET this long — i.e. no result written
@@ -170,7 +170,7 @@ export function RunEvalButton({
 
       {phase.kind === "done" ? (
         <p className="text-sm text-emerald-600">
-          ارزیابی تمام شد — امتیاز سلامت: ٪{fa(phase.health)} ({fa(phase.pass)} قبول ·{" "}
+          ارزیابی تمام شد — امتیاز سلامت: {fa(phase.health)}% ({fa(phase.pass)} قبول ·{" "}
           {fa(phase.warn)} هشدار · {fa(phase.fail)} مردود
           {phase.skipped > 0 ? ` · ${fa(phase.skipped)} سنجیده‌نشده` : ""})
           {phase.skipped > 0 ? (

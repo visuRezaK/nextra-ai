@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
-import { PageTitle, StatCard, Badge, fa, faDate } from "@/components/admin/ui";
+import { PageTitle, StatCard, Badge, fa, faDate, faPct } from "@/components/admin/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -57,11 +57,11 @@ export default async function EvalRunDetailPage({
       </Link>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <StatCard label="سلامت" value={run.status === "done" ? `٪${fa(totals.health ?? 0)}` : "—"} />
-        <StatCard label="ضدتوهم" value={`٪${fa(totals.faithfulness ?? 0)}`} />
-        <StatCard label="ربط پاسخ" value={`٪${fa(totals.relevance ?? 0)}`} />
-        <StatCard label="لحن برند" value={`٪${fa(totals.tone ?? 0)}`} />
-        <StatCard label="بازیابی" value={`٪${fa(totals.retrieval ?? 0)}`} />
+        <StatCard label="سلامت" value={run.status === "done" ? faPct(totals.health ?? 0) : "—"} />
+        <StatCard label="ضدتوهم" value={faPct(totals.faithfulness ?? 0)} />
+        <StatCard label="ربط پاسخ" value={faPct(totals.relevance ?? 0)} />
+        <StatCard label="لحن برند" value={faPct(totals.tone ?? 0)} />
+        <StatCard label="بازیابی" value={faPct(totals.retrieval ?? 0)} />
       </div>
 
       <div className="mt-6 flex flex-col gap-4">
@@ -95,7 +95,7 @@ export default async function EvalRunDetailPage({
                 <p className="mt-2 text-xs text-muted">
                   بازیابی‌شده‌ها:{" "}
                   {retrieved
-                    .map((c) => `${c.title ?? "بدون عنوان"} (٪${fa(Math.round(c.similarity * 100))})`)
+                    .map((c) => `${c.title ?? "بدون عنوان"} (${faPct(Math.round(c.similarity * 100))})`)
                     .join(" · ")}
                 </p>
               ) : null}

@@ -106,8 +106,8 @@ export async function broadcastAction(
 
   return {
     ok: true,
-    message: `ارسال شد به ${sent.toLocaleString("fa-IR")} چت${
-      failed ? `؛ ${failed.toLocaleString("fa-IR")} ناموفق` : ""
+    message: `ارسال شد به ${sent.toLocaleString("fa-IR-u-nu-latn")} چت${
+      failed ? `؛ ${failed.toLocaleString("fa-IR-u-nu-latn")} ناموفق` : ""
     }.`,
   };
 }

@@ -16,6 +16,47 @@ export interface LeadNotification {
   source: string; // 'chatbot' | 'web'
 }
 
+export type SendResult = { ok: true } | { ok: false; error: string };
+
+// Generic one-off email over the same Resend REST path. Unlike the notify*
+// helpers (which alert the OWNER and are best-effort no-ops), this returns a
+// result so the caller — the campaign sender — can mark each recipient
+// sent/failed. Not configured => a clear error, never a throw.
+export async function sendEmail(params: {
+  to: string;
+  subject: string;
+  text: string;
+}): Promise<SendResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { ok: false, error: "RESEND_API_KEY تنظیم نشده است." };
+  if (!params.to) return { ok: false, error: "گیرنده ندارد." };
+
+  const from = process.env.LEAD_NOTIFY_FROM ?? "Nextra AI Consulting <onboarding@resend.dev>";
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({ from, to: params.to, subject: params.subject, text: params.text }),
+    });
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error("sendEmail: Resend error", res.status, detail);
+      let message = `خطای Resend (${res.status})`;
+      try {
+        const parsed = JSON.parse(detail) as { message?: string };
+        if (parsed.message) message = parsed.message;
+      } catch {
+        /* keep the status-only message */
+      }
+      return { ok: false, error: message };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("sendEmail failed:", err);
+    return { ok: false, error: "اتصال به Resend ناموفق بود." };
+  }
+}
+
 // Best-effort owner alert when a chat user asks for a human operator.
 export async function notifyHandoff(params: {
   channel: string;

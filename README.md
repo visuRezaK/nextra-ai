@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nextra AI Consulting — وب‌سایت، چت‌بات و CRM
 
-## Getting Started
+سایت بازاریابی + دستیار هوشمند (چت‌بات RAG و دستیار صوتی) + پنل مدیریت با یک CRM کامل، همه روی یک پروژهٔ Next.js 16 و یک Supabase.
 
-First, run the development server:
+## اجرا
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev      # http://localhost:3000
+npm run build    # بیلد پروداکشن
+npm run lint     # ESLint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- سایت عمومی: `/fa` (پیش‌فرض، RTL) و `/en`
+- پنل مدیریت: `/admin` (فارسی، ورود با Supabase)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## معماری (خلاصه)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 16 App Router**، مسیریابی بر پایهٔ locale (`app/[locale]`). محتوای سایت داده‌محور از `lib/i18n/dictionaries/*.json`.
+- **چت‌بات RAG** روی Gemini (کلید مستقیم Google، تیر رایگان). جریان در `lib/chatbot/brain.ts`؛ همان مغز پشت وب، تلگرام و اسکریپت امبد.
+- **دستیار صوتی** روی ElevenLabs.
+- **Supabase** برای auth + دیتابیس. کلاینت سرویس‌رول فقط سمت سرور (`lib/chatbot/supabase-admin.ts`)؛ RLS فعال بدون policy.
+- **پنل ادمین** فارسی، دسترسی نقش‌محور (`profiles.role`: admin/editor/operator/viewer) از `lib/admin/auth.ts`. هر صفحه/اکشن اول `requireRole([...])` صدا می‌زند. اعداد لاتین، تاریخ میلادیِ تورنتو، برچسب‌های دوزبانه، پول به دلار کانادا.
 
-## Learn More
+## CRM (بخش‌های پنل)
 
-To learn more about Next.js, take a look at the following resources:
+مدل نرمال: لید (`contacts`) با دکمهٔ **تبدیل** به مخاطب + شرکت + معامله ارتقا می‌یابد؛ از آنجا همه‌چیز حول پروندهٔ مخاطب جمع می‌شود.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **لیدها** (`/admin/leads`) — صف ورودی چهار کانال (فرم، چت‌بات، صوتی، تلگرام) + تبدیل
+- **مخاطبان** (`/admin/people`) — نمای ۳۶۰ درجه: تماس، معاملات، تایم‌لاین یکپارچه
+- **شرکت‌ها** (`/admin/companies`)
+- **معاملات** (`/admin/deals`) — برد کانبان با درگ‌انددراپ بومی؛ مراحل config-driven از `pipeline_stages`
+- **فعالیت‌ها** (`/admin/activities`) — تماس/جلسه/یادداشت/وظیفه؛ وظیفهٔ معوق قرمز، امروز طلایی
+- **قراردادها** (`/admin/contracts`) — ساخت از معامله، ویرایشگر Markdown، صفحهٔ عمومی `/contract/[token]` با چاپ PDF و تأیید آنلاین
+- **کمپین‌ها** (`/admin/campaigns`) — سگمنت‌های کدی، ایمیل اختصاصی با بازبینی انسانی، ارسال با Resend
+- **گزارش‌ها** (`/admin/reports`) — قیف تبدیل، ارزش مسیر فروش به تفکیک مرحله، درآمد ماهانه، منابع
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> قابلیت‌های هوش مصنوعی (امتیازدهی لید، خلاصهٔ گفتگو، بازنویسی قرارداد، تولید ایمیل کمپین، دستیار CRM) در کد پیش‌بینی شده ولی **پشت گیت غیرفعال «به‌زودی»** است تا در فاز بعد یک‌جا روشن شود.
 
-## Deploy on Vercel
+## مهاجرت دیتابیس (SQL)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+فایل‌های `supabase/*.sql` **به‌ترتیب و دستی** در Supabase SQL editor اجرا می‌شوند (ابزار مهاجرت نداریم). همه idempotent‌اند و صفحات تا اجرانشدنشان fail-soft می‌مانند:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+schema.sql → chatbot.sql → admin.sql → admin2 … admin5.sql
+admin6.sql   لید: مرحله + مالک + پیگیری (خط لولهٔ تخت)
+admin7.sql   لید: مبلغ + تاریخ بستن + تاریخ برد
+admin8.sql   CRM نرمال: companies, people, deals, pipeline_stages, activities
+admin9.sql   contracts
+admin10.sql  campaigns + campaign_emails
+```
+
+## دادهٔ نمایشی
+
+اسکریپت `scripts/seed-crm-demo.mjs` کل CRM را با کلاینت‌های خیالی فارسی پر می‌کند — ۸ شرکت، ۱۱ مخاطب، معاملات در همهٔ مراحل + برد/باخت پخش‌شده در چند ماه (برای نمودار درآمد)، وظایف معوق/امروز/آینده، لیدهای تازه برای دموی تبدیل، یک گفتگوی چت‌بات، دو قرارداد و یک کمپین.
+
+```bash
+node scripts/seed-crm-demo.mjs            # ساخت دادهٔ نمایشی
+node scripts/seed-crm-demo.mjs --clean    # پاک‌سازی کامل (برچسب‌دار و برگشت‌پذیر)
+```
+
+نیازمند `.env.local` با `NEXT_PUBLIC_SUPABASE_URL` و `SUPABASE_SERVICE_ROLE_KEY`. برای ارسال واقعی ایمیل کمپین، `RESEND_API_KEY` لازم است.
+
+### سناریوی دمو (سرتاسری)
+
+۱. `/admin/leads` → یک لید تازه → **تبدیل به مخاطب** (+ شرکت + معامله)
+۲. پروندهٔ مخاطب: یادداشت/وظیفه ثبت، تایم‌لاین را ببینید
+۳. `/admin/deals` → کارت را در برد بین مراحل بکشید تا «برنده»
+۴. `/admin/deals/[id]` → **ساخت قرارداد** → ارسال → صفحهٔ عمومی → چاپ/تأیید
+۵. `/admin/campaigns` → کمپین «مشتریان برنده» → بازبینی/ارسال ایمیل
+۶. `/admin/reports` → قیف، درآمد ماهانه و منابع را ببینید
+
+## استقرار
+
+Vercel (پروژهٔ `nextra-ai`). تغییر هر env نیاز به ری‌دیپلوی دارد. جزئیات بیشتر در `CLAUDE.md`.

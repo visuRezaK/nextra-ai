@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
-import { PageTitle, StatCard, Badge, fa, faDate } from "@/components/admin/ui";
+import { PageTitle, StatCard, Badge, fa, faDate, faPct } from "@/components/admin/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +70,7 @@ export default async function FeedbackPage() {
         <StatCard label="👎 غیرمفید" value={fa(down)} />
         <StatCard
           label="نرخ رضایت"
-          value={satisfaction === null ? "—" : `٪${fa(satisfaction)}`}
+          value={satisfaction === null ? "—" : faPct(satisfaction)}
         />
         <StatCard label="سؤالات بی‌جواب اخیر" value={fa(unanswered.length)} />
       </div>

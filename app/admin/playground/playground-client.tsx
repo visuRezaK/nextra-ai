@@ -9,7 +9,7 @@ const MODEL_OPTIONS = [
   { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
 ];
 
-const fa = (n: number) => n.toLocaleString("fa-IR");
+const fa = (n: number) => n.toLocaleString("fa-IR-u-nu-latn");
 
 export function PlaygroundClient() {
   const [state, action, pending] = useActionState<PlaygroundState, FormData>(
@@ -124,7 +124,7 @@ export function PlaygroundClient() {
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-medium">{c.title || c.category}</span>
                     <span className="text-xs text-muted" dir="ltr">
-                      ٪{fa(Math.round(c.similarity * 100))} · {c.category}
+                      {fa(Math.round(c.similarity * 100))}% · {c.category}
                     </span>
                   </div>
                   <p className="line-clamp-3 leading-6 text-foreground/70">{c.content}</p>

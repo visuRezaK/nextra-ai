@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
 import { loadEvaluationOverview } from "@/lib/chatbot/evaluate";
-import { PageTitle, StatCard, AdminTable, Badge, fa, faDate } from "@/components/admin/ui";
+import { PageTitle, StatCard, AdminTable, Badge, fa, faDate, faPct } from "@/components/admin/ui";
 import { RunEvalButton, SeedButton, AddQuestionForm } from "./eval-client";
 import { deleteQuestionAction, continueRunFormAction, markRunFailedAction } from "./actions";
 
@@ -98,7 +98,7 @@ export default async function EvaluationPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="امتیاز سلامت (ترکیب دسته‌ها)"
-          value={health === null ? "—" : `٪${fa(health)}`}
+          value={health === null ? "—" : faPct(health)}
           hint={coverage ? `${healthStatus} · ${coverage}` : healthStatus}
         />
         <StatCard
@@ -119,7 +119,7 @@ export default async function EvaluationPage() {
         <StatCard label="سؤالات آزمون" value={fa(questions.length)} />
         <StatCard
           label="رضایت کاربران واقعی"
-          value={satisfaction === null ? "—" : `٪${fa(satisfaction)}`}
+          value={satisfaction === null ? "—" : faPct(satisfaction)}
           hint="از دکمه‌های 👍/👎"
         />
       </div>
@@ -142,7 +142,7 @@ export default async function EvaluationPage() {
                 </div>
                 {g.lastRun ? (
                   <p className="mb-3 text-xs text-muted">
-                    آخرین اجرا: <span className="font-medium text-foreground">٪{fa(g.lastRun.health)}</span>
+                    آخرین اجرا: <span className="font-medium text-foreground">{faPct(g.lastRun.health)}</span>
                     {" · "}
                     {faDate(g.lastRun.startedAt)}
                     {g.lastRun.skipped > 0 ? ` · ${fa(g.lastRun.skipped)} سنجیده‌نشده` : ""}
@@ -181,8 +181,8 @@ export default async function EvaluationPage() {
                 return (
                   <tr key={c.key}>
                     <td className="py-2">{c.label}</td>
-                    <td className="py-2 font-medium">٪{fa(score)}</td>
-                    <td className="py-2 text-muted">≥ ٪{fa(c.target)}</td>
+                    <td className="py-2 font-medium">{faPct(score)}</td>
+                    <td className="py-2 text-muted">≥ {faPct(c.target)}</td>
                     <td className="py-2">{ok ? "✅" : close ? "⚠️" : "❌"}</td>
                   </tr>
                 );
@@ -205,7 +205,7 @@ export default async function EvaluationPage() {
               const stale = isStaleRun(r.status, r.started_at);
               const statusLabel =
                 r.status === "done"
-                  ? `٪${fa(t.health ?? 0)}`
+                  ? faPct(t.health ?? 0)
                   : r.status === "running"
                     ? stale
                       ? "ناتمام"
