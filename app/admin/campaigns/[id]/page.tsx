@@ -130,6 +130,7 @@ export default async function CampaignDetailPage({
                   <>
                     <EmailCompose
                       emailId={e.id}
+                      toEmail={e.to_email ?? ""}
                       subject={e.subject ?? ""}
                       bodyText={e.body_text ?? ""}
                       disabled={locked}

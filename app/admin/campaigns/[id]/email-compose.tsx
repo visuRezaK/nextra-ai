@@ -10,11 +10,13 @@ const inputClass =
 // The «تولید با AI» button is gated to the AI phase.
 export function EmailCompose({
   emailId,
+  toEmail,
   subject,
   bodyText,
   disabled,
 }: {
   emailId: string;
+  toEmail: string;
   subject: string;
   bodyText: string;
   disabled: boolean;
@@ -41,6 +43,18 @@ export function EmailCompose({
       </form>
       <form action={action} className="mt-3 flex flex-col gap-2">
         <input type="hidden" name="email_id" value={emailId} />
+      <label className="flex flex-col gap-1">
+        <span className="text-xs text-muted">ایمیل گیرنده (Recipient)</span>
+        <input
+          name="to_email"
+          type="email"
+          dir="ltr"
+          defaultValue={toEmail}
+          placeholder="name@example.com"
+          disabled={disabled}
+          className={`${inputClass} text-start`}
+        />
+      </label>
       <input
         name="subject"
         defaultValue={subject}

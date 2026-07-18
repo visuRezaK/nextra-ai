@@ -68,6 +68,10 @@ export async function updateEmailAction(
   if (!emailId) return { ok: false, error: "ایمیل مشخص نشده است." };
   const subject = String(formData.get("subject") ?? "").trim();
   const bodyText = String(formData.get("body_text") ?? "").trim();
+  const toEmail = String(formData.get("to_email") ?? "").trim();
+  if (!toEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
+    return { ok: false, error: "ایمیل گیرنده نامعتبر است." };
+  }
 
   const supabase = getAdminClient();
   const { data: current } = await supabase
@@ -81,7 +85,7 @@ export async function updateEmailAction(
   const status = subject && bodyText ? "ready" : "pending";
   const { error } = await supabase
     .from("campaign_emails")
-    .update({ subject: subject || null, body_text: bodyText || null, status, error: null })
+    .update({ to_email: toEmail, subject: subject || null, body_text: bodyText || null, status, error: null })
     .eq("id", emailId);
   if (error) {
     console.error("updateEmail error:", error);
