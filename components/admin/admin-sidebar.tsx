@@ -45,9 +45,11 @@ export function AdminSidebar({ role }: { role: StaffRole }) {
         />
       ) : null}
 
-      {/* Sidebar / drawer */}
+      {/* Sidebar / drawer. Physical right-0 (not logical end-0, which resolves to
+          the LEFT in RTL): the drawer sits at the right edge under the hamburger
+          and slides off right when closed. On md+ it becomes a static column. */}
       <aside
-        className={`fixed inset-y-0 end-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto border-e border-border bg-surface px-4 py-6 transition-transform md:static md:z-auto md:w-56 md:translate-x-0 ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-72 max-w-[80vw] shrink-0 flex-col overflow-y-auto border-s border-border bg-surface px-4 py-6 shadow-xl transition-transform md:static md:z-auto md:w-56 md:max-w-none md:translate-x-0 md:shadow-none ${
           open ? "translate-x-0" : "translate-x-full md:translate-x-0"
         }`}
       >
