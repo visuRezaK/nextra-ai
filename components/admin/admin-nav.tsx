@@ -63,7 +63,7 @@ const groups: Group[] = [
   },
 ];
 
-export function AdminNav({ role }: { role: StaffRole }) {
+export function AdminNav({ role, onNavigate }: { role: StaffRole; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -91,6 +91,7 @@ export function AdminNav({ role }: { role: StaffRole }) {
           <Link
             key={t.href}
             href={t.href}
+            onClick={onNavigate}
             className={`rounded-lg px-3 py-2 text-sm transition-colors ${
               isActive(t.href)
                 ? "bg-accent/10 font-medium text-accent"
