@@ -5,22 +5,16 @@ import { LEAD_STATUSES, leadStatusLabel, type LeadStatus } from "@/lib/admin/lea
 import { updateLeadAction, type LeadActionState } from "../actions";
 
 // Stage + next follow-up + an optional note, in one submit: the whole point of
-// working a lead is doing all three at once after a call.
+// working a lead is doing all three at once after a call. (Money lives on the
+// DEAL, not the lead — set it after converting.)
 export function LeadForm({
   contactId,
   status,
   nextFollowUpAt,
-  amountCad,
-  expectedClose,
-  showMoney,
 }: {
   contactId: string;
   status: LeadStatus;
   nextFollowUpAt: string | null;
-  amountCad: number;
-  expectedClose: string | null;
-  // False until admin7.sql runs — the action would fail on the missing columns.
-  showMoney: boolean;
 }) {
   const [state, action, pending] = useActionState<LeadActionState, FormData>(
     updateLeadAction,
@@ -68,35 +62,6 @@ export function LeadForm({
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </label>
-
-        {showMoney ? (
-          <>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm text-muted">مبلغ (Amount, CAD)</span>
-              <input
-                type="number"
-                name="amount_cad"
-                dir="ltr"
-                min={0}
-                step="0.01"
-                defaultValue={amountCad || ""}
-                placeholder="0.00"
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm text-muted">تاریخ بستن تخمینی (Expected close)</span>
-              <input
-                type="date"
-                name="expected_close"
-                dir="ltr"
-                defaultValue={expectedClose ?? ""}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-              />
-            </label>
-          </>
-        ) : null}
       </div>
 
       <label className="flex flex-col gap-1.5">

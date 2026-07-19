@@ -35,18 +35,8 @@ function parseFollowUpDate(raw: string): string | null | "invalid" {
   return d.toISOString();
 }
 
-// expected_close is a plain `date` column, so unlike next_follow_up_at it needs
-// no timezone anchoring — the raw YYYY-MM-DD is stored as-is.
-function parseCloseDate(raw: string): string | null | "invalid" {
-  if (!raw) return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return "invalid";
-  if (Number.isNaN(new Date(raw).getTime())) return "invalid";
-  return raw;
-}
-
-// The amount input is type=number, but a pasted «5,000.50» or a stray space
-// would arrive as junk — reject rather than silently store 0. Dollars have
-// cents, so decimals are allowed; the column is numeric(12,2) and rounds to 2.
+// The convert form's deal-amount input is type=number, but a pasted «5,000.50»
+// or a stray space would arrive as junk — reject rather than silently store 0.
 function parseCad(raw: string): number | "invalid" {
   if (!raw) return 0;
   const cleaned = raw.replace(/[,٬\s]/g, "");
@@ -97,70 +87,27 @@ export async function updateLeadAction(
   const followUp = parseFollowUpDate(String(formData.get("next_follow_up_at") ?? "").trim());
   if (followUp === "invalid") return { ok: false, error: "تاریخ پیگیری نامعتبر است." };
 
-  const expectedClose = parseCloseDate(String(formData.get("expected_close") ?? "").trim());
-  if (expectedClose === "invalid") return { ok: false, error: "تاریخ بستن نامعتبر است." };
-
-  const amount = parseCad(String(formData.get("amount_cad") ?? "").trim());
-  if (amount === "invalid")
-    return { ok: false, error: "مبلغ نامعتبر است — یک عدد مثبت به دلار کانادا وارد کنید." };
-
   const note = String(formData.get("note") ?? "").trim();
 
   const supabase = getAdminClient();
 
-  // Read the current stage first so we know whether to log a status change and
-  // whether won_at needs to move. won_at only exists after admin7.sql, so a null
-  // here would otherwise read as «lead not found» — step down instead.
-  let { data: current } = await supabase
+  // Read the current stage first so we know whether to log a status change.
+  const { data: current } = await supabase
     .from("contacts")
-    .select("status, won_at")
+    .select("status")
     .eq("id", contactId)
     .maybeSingle();
-  if (!current) {
-    ({ data: current } = await supabase
-      .from("contacts")
-      .select("status")
-      .eq("id", contactId)
-      .maybeSingle());
-  }
   if (!current) return { ok: false, error: "لید یافت نشد." };
 
   const previous = current.status as string | null;
 
-  // won_at stamps the close, so the monthly-revenue report has a date to group
-  // on. It's set on the way in and cleared on the way out — a lead reopened
-  // after a mistaken «برنده» must not keep counting as revenue.
-  let wonAt = (current.won_at as string | null) ?? null;
-  if (status === "won" && previous !== "won") wonAt = new Date().toISOString();
-  else if (status !== "won" && previous === "won") wonAt = null;
-
-  const base = {
-    status,
-    next_follow_up_at: followUp,
-    updated_at: new Date().toISOString(),
-  };
   const { error } = await supabase
     .from("contacts")
-    .update({ ...base, expected_close: expectedClose, amount_cad: amount, won_at: wonAt })
+    .update({ status, next_follow_up_at: followUp, updated_at: new Date().toISOString() })
     .eq("id", contactId);
   if (error) {
-    // Unknown-column error — admin7.sql not applied yet. PostgREST reports it as
-    // PGRST204 (schema cache) or 42703 (PostgreSQL). Retry without the money
-    // columns so the stage change still lands, same as appendMessages does for
-    // the usage columns in lib/chatbot/memory.ts.
-    if (error.code === "PGRST204" || error.code === "42703") {
-      const { error: retryError } = await supabase
-        .from("contacts")
-        .update(base)
-        .eq("id", contactId);
-      if (retryError) {
-        console.error("updateLead retry error:", retryError);
-        return { ok: false, error: CRM_MISSING_ERROR };
-      }
-    } else {
-      console.error("updateLead error:", error);
-      return { ok: false, error: CRM_MISSING_ERROR };
-    }
+    console.error("updateLead error:", error);
+    return { ok: false, error: CRM_MISSING_ERROR };
   }
 
   if (isLeadStatus(previous) && previous !== status) {
@@ -189,14 +136,7 @@ export async function updateLeadAction(
     actor: user,
     action: "lead.update",
     target: contactId,
-    meta: {
-      status,
-      next_follow_up_at: followUp,
-      expected_close: expectedClose,
-      amount_cad: amount,
-      won_at: wonAt,
-      note: note.length > 0,
-    },
+    meta: { status, next_follow_up_at: followUp, note: note.length > 0 },
   });
   revalidateLead(contactId);
   return { ok: true };

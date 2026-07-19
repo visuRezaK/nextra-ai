@@ -80,9 +80,9 @@ export default async function AdminDashboardPage() {
     // Pipeline columns exist only after admin6.sql → data is null → the pipeline
     // section hides itself and the new cards read «—».
     supabase.from("contacts").select("status, next_follow_up_at").limit(2000),
-    // amount_cad needs admin7.sql on top, so it degrades separately: the
-    // pipeline can be live while the value card isn't.
-    supabase.from("contacts").select("status, amount_cad").limit(2000),
+    // Open pipeline value comes from DEALS (money lives on the deal, not the
+    // lead). Null before admin8 → the value card reads «—».
+    supabase.from("deals").select("status, amount_cad").limit(5000),
     // Overdue open tasks (admin8). Null before admin8 → the card/section hide.
     supabase
       .from("activities")
@@ -137,10 +137,8 @@ export default async function AdminDashboardPage() {
   const moneyReady = valueRows !== null;
   let openValue = 0;
   for (const row of valueRows ?? []) {
-    if ((OPEN_LEAD_STATUSES as readonly string[]).includes(row.status as string)) {
-      // numeric(12,2) can arrive from PostgREST as a string.
-      openValue += Number(row.amount_cad ?? 0);
-    }
+    // Open deals only. numeric(12,2) can arrive from PostgREST as a string.
+    if (row.status === "open") openValue += Number(row.amount_cad ?? 0);
   }
 
   // Overdue tasks (admin8). count is null-safe; the list is null before admin8.

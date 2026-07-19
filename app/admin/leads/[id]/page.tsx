@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/admin/auth";
 import { getAdminClient } from "@/lib/chatbot/supabase-admin";
-import { PageTitle, Badge, En, faDate, faCad } from "@/components/admin/ui";
+import { PageTitle, Badge, En, faDate } from "@/components/admin/ui";
 import {
   isLeadNoteKind,
   isLeadStatus,
@@ -22,11 +22,11 @@ export const dynamic = "force-dynamic";
 
 const BASE_COLUMNS = "id, name, email, phone, message, source, session_id, created_at";
 const CRM_COLUMNS = `${BASE_COLUMNS}, status, owner_id, next_follow_up_at, updated_at`;
-const MONEY_COLUMNS = `${CRM_COLUMNS}, amount_cad, expected_close, won_at`;
 
 // The PostgREST type parser can't infer a row shape from a column list chosen at
-// runtime, so it's declared here. The later fields are optional because the
-// lower-tier fallback queries don't select them.
+// runtime, so it's declared here. The CRM fields are optional because the
+// base-tier fallback query doesn't select them. (Money is a DEAL concept now —
+// the lead itself no longer carries an amount.)
 type LeadDetailRow = {
   id: string;
   name: string;
@@ -38,8 +38,6 @@ type LeadDetailRow = {
   created_at: string;
   status?: string | null;
   next_follow_up_at?: string | null;
-  amount_cad?: number | null;
-  expected_close?: string | null;
 };
 
 export default async function LeadDetailPage({
@@ -51,26 +49,19 @@ export default async function LeadDetailPage({
   const { id } = await params;
   const supabase = getAdminClient();
 
-  // Two migrations add columns here, and each has to degrade on its own: with
-  // admin6 applied but not admin7 the pipeline form must still work, just
-  // without the money fields. So the select steps down a tier at a time
-  // (admin7 → admin6 → original). The happy path is still one query; a
-  // genuinely missing id walks all three and then 404s, which is harmless.
+  // The CRM columns (admin6) degrade to the original ones so the page never
+  // breaks if the migration hasn't run. A genuinely missing id walks both tiers
+  // and then 404s, which is harmless.
   let crmReady = true;
-  let moneyReady = true;
   const fetchLead = async (columns: string): Promise<LeadDetailRow | null> => {
     const { data } = await supabase.from("contacts").select(columns).eq("id", id).maybeSingle();
     return (data ?? null) as unknown as LeadDetailRow | null;
   };
 
-  let lead = await fetchLead(MONEY_COLUMNS);
+  let lead = await fetchLead(CRM_COLUMNS);
   if (!lead) {
-    moneyReady = false;
-    lead = await fetchLead(CRM_COLUMNS);
-    if (!lead) {
-      crmReady = false;
-      lead = await fetchLead(BASE_COLUMNS);
-    }
+    crmReady = false;
+    lead = await fetchLead(BASE_COLUMNS);
   }
   if (!lead) notFound();
 
@@ -108,8 +99,6 @@ export default async function LeadDetailPage({
 
   const status: LeadStatus = isLeadStatus(lead.status) ? lead.status : "new";
   const nextFollowUpAt = (lead.next_follow_up_at as string | null) ?? null;
-  const amountCad = Number(lead.amount_cad ?? 0);
-  const expectedClose = (lead.expected_close as string | null) ?? null;
   const overdue = crmReady && isOverdue(nextFollowUpAt, status);
   const canEdit = role !== "viewer";
 
@@ -153,9 +142,6 @@ export default async function LeadDetailPage({
           {lead.name}
           {crmReady ? (
             <Badge tone={LEAD_STATUS_TONES[status]}>{leadStatusLabel(status)}</Badge>
-          ) : null}
-          {moneyReady && amountCad > 0 ? (
-            <span className="text-sm font-normal text-muted">{faCad(amountCad)}</span>
           ) : null}
         </h2>
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -253,7 +239,7 @@ export default async function LeadDetailPage({
             <p className="mb-4 text-sm text-muted">
               لید را به مخاطب + شرکت + معامله ارتقا دهید. پیام لید اولین یادداشت تایم‌لاین می‌شود.
             </p>
-            <ConvertForm contactId={lead.id} defaultAmount={amountCad} />
+            <ConvertForm contactId={lead.id} defaultAmount={0} />
           </div>
         ) : null
       ) : null}
@@ -269,40 +255,13 @@ export default async function LeadDetailPage({
             Supabase اجرا کنید.
           </p>
         ) : canEdit ? (
-          <>
-            {!moneyReady ? (
-              <p className="mb-4 rounded-lg border border-amber-400/40 bg-amber-500/5 p-3 text-sm text-muted">
-                برای ثبت مبلغ و تاریخ بستن، فایل <span dir="ltr">supabase/admin7.sql</span> را هم
-                اجرا کنید.
-              </p>
-            ) : null}
-            <LeadForm
-              contactId={lead.id}
-              status={status}
-              nextFollowUpAt={nextFollowUpAt}
-              amountCad={amountCad}
-              expectedClose={expectedClose}
-              showMoney={moneyReady}
-            />
-          </>
+          <LeadForm contactId={lead.id} status={status} nextFollowUpAt={nextFollowUpAt} />
         ) : (
           <dl className="grid gap-3 text-sm sm:grid-cols-3">
             <div>
               <dt className="text-xs text-muted">پیگیری بعدی (Next follow-up)</dt>
               <dd>{nextFollowUpAt ? faDate(nextFollowUpAt) : "—"}</dd>
             </div>
-            {moneyReady ? (
-              <>
-                <div>
-                  <dt className="text-xs text-muted">مبلغ (Amount)</dt>
-                  <dd>{faCad(amountCad)}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted">تاریخ بستن (Expected close)</dt>
-                  <dd dir="ltr" className="text-start">{expectedClose ?? "—"}</dd>
-                </div>
-              </>
-            ) : null}
           </dl>
         )}
       </div>
