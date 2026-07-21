@@ -14,6 +14,8 @@ export interface LeadNotification {
   phone?: string | null;
   message?: string | null;
   source: string; // 'chatbot' | 'web'
+  meetingTime?: string | null; // e.g. "2026-07-25 14:00 (Toronto)" — booking form only
+  meetLink?: string | null; // Google Meet link, when the calendar event was created
 }
 
 export type SendResult = { ok: true } | { ok: false; error: string };
@@ -116,6 +118,8 @@ export async function notifyLead(lead: LeadNotification): Promise<void> {
     lead.email ? `ایمیل: ${lead.email}` : null,
     lead.phone ? `تلفن: ${lead.phone}` : null,
     lead.message ? `توضیح: ${lead.message}` : null,
+    lead.meetingTime ? `زمان جلسه: ${lead.meetingTime}` : null,
+    lead.meetLink ? `لینک Meet: ${lead.meetLink}` : null,
     `منبع: ${sourceLabel}`,
   ]
     .filter(Boolean)
