@@ -7,12 +7,10 @@
 // set (obtained once via scripts/google-oauth-setup.mjs). Best-effort: never
 // throws, so a Calendar/Google outage must never break lead capture.
 
-const TIME_ZONE = "America/Toronto";
-
 export interface MeetEventParams {
   summary: string;
   description?: string | null;
-  /** Local wall-clock time, no offset, e.g. "2026-07-25T14:00:00". Interpreted in TIME_ZONE. */
+  /** Full UTC ISO instant, e.g. "2026-07-25T19:30:00.000Z". */
   startDateTime: string;
   endDateTime: string;
   attendeeEmail: string;
@@ -66,8 +64,8 @@ export async function createMeetEvent(params: MeetEventParams): Promise<CreateMe
       body: JSON.stringify({
         summary: params.summary,
         description: params.description || undefined,
-        start: { dateTime: params.startDateTime, timeZone: TIME_ZONE },
-        end: { dateTime: params.endDateTime, timeZone: TIME_ZONE },
+        start: { dateTime: params.startDateTime, timeZone: "UTC" },
+        end: { dateTime: params.endDateTime, timeZone: "UTC" },
         attendees: [{ email: params.attendeeEmail }],
         conferenceData: {
           createRequest: {

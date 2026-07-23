@@ -103,6 +103,7 @@ export function Transform({ dict }: Props) {
 
 export function Hero({ dict, locale }: Props) {
   const sh = dict.splitHero;
+  const base = `/${locale}`;
   return (
     <>
       {/* Screen 1 — split hero (owner photo + intro + consultation CTA).
@@ -131,6 +132,13 @@ export function Hero({ dict, locale }: Props) {
                   </li>
                 ))}
               </ul>
+              <ButtonLink
+                href={`${base}/book`}
+                size="lg"
+                className="anim-rise anim-rise--5 mx-auto mt-8 w-full sm:w-auto lg:mx-0"
+              >
+                {dict.hero.ctaPrimary}
+              </ButtonLink>
             </div>
             {/* Image column — owner photo */}
             <div className="anim-rise anim-rise--2 order-first lg:order-none">

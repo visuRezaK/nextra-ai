@@ -3,22 +3,19 @@
 import { createClient } from "@supabase/supabase-js";
 import { notifyLead } from "@/lib/chatbot/notify";
 import { createMeetEvent } from "@/lib/google/calendar";
+import { TORONTO_TZ } from "@/lib/timezone";
 
 export type ContactState = { success: boolean; error?: string } | undefined;
 
-// <input type="date"> / type="time"> submit bare "YYYY-MM-DD" / "HH:MM" with no
-// zone. We hand those straight to the Calendar API as a local wall-clock
-// dateTime + timeZone: "America/Toronto" (see lib/google/calendar.ts) so Google
-// resolves DST correctly — this helper only does wall-clock minute arithmetic,
-// never a real UTC conversion.
-function addMinutes(localDateTime: string, minutes: number): string {
-  const [datePart, timePart] = localDateTime.split("T");
-  const [y, m, d] = datePart.split("-").map(Number);
-  const [h, min] = timePart.split(":").map(Number);
-  const t = new Date(Date.UTC(y, m - 1, d, h, min + minutes));
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:00`;
-}
+const torontoDisplay = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TORONTO_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
 
 export async function submitContactAction(
   prevState: ContactState,
@@ -28,14 +25,16 @@ export async function submitContactAction(
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const message = String(formData.get("message") ?? "").trim();
-  const date = String(formData.get("date") ?? "").trim();
+  const visitorTz = String(formData.get("visitorTz") ?? "").trim();
+  // The <select> value is the slot's real UTC instant (ISO string) — computed
+  // client-side from Toronto business hours, see lib/timezone.ts.
   const time = String(formData.get("time") ?? "").trim();
   const locale = String(formData.get("locale") ?? "fa");
 
-  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
-  const validTime = /^\d{2}:\d{2}$/.test(time);
+  const startInstant = new Date(time);
+  const validTime = !Number.isNaN(startInstant.getTime());
 
-  if (!name || !email || !validDate || !validTime) {
+  if (!name || !email || !validTime) {
     return {
       success: false,
       error:
@@ -69,17 +68,42 @@ export async function submitContactAction(
     };
   }
 
-  const startDateTime = `${date}T${time}:00`;
-  const endDateTime = addMinutes(startDateTime, 30);
-  const meetingTime = `${date} ${time} (Toronto)`;
+  const endInstant = new Date(startInstant.getTime() + 30 * 60000);
+  let meetingTime = `${torontoDisplay.format(startInstant)} (Toronto)`;
+  if (visitorTz && visitorTz !== TORONTO_TZ) {
+    try {
+      const visitorDisplay = new Intl.DateTimeFormat("en-CA", {
+        timeZone: visitorTz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      });
+      meetingTime += ` — ${visitorDisplay.format(startInstant)} (${visitorTz})`;
+    } catch {
+      // Unknown/invalid IANA zone from the client — ignore, Toronto time still shown.
+    }
+  }
+
+  // A clear, always-present description (rather than leaving it empty when
+  // the customer skips the message field) gives spam filters more legitimate
+  // business content to weigh against a bare, templated-looking invite.
+  const description = [
+    `جلسه مشاوره رایگان هوش مصنوعی با Nextra AI برای ${name}.`,
+    message ? `توضیح مشتری: ${message}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   // Best-effort: creates the Meet event and emails the lead the invite
   // directly (sendUpdates: "all"). Never blocks the form response.
   const meetResult = await createMeetEvent({
     summary: `مشاوره Nextra AI: ${name}`,
-    description: message || undefined,
-    startDateTime,
-    endDateTime,
+    description,
+    startDateTime: startInstant.toISOString(),
+    endDateTime: endInstant.toISOString(),
     attendeeEmail: email,
   });
 
